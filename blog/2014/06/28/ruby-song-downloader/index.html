@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ruby Song Downloader - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="Since I&rsquo;m working on puppet DSL language from past year, so always wanted to take on ruby. Finally got the chances to do some task.
+I have had &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="ashish1099.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ruby Song Downloader</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-06-28T03:29:23+05:30'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:29 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Since I&rsquo;m working on puppet DSL language from past year, so always wanted to take on <code>ruby</code>. Finally got the chances to do some task.
+I have had lost many of my songs library. So wanted to keep track of everything and needed to start from scratch. As I love Hindi/Bollywood
+songs, the only site comes to my mind is <code>songspk.name</code> and I had some trouble accessing it, due to Indian goverment blocking or either my ISP.</p>
+
+<p>To get out of this, I found a site <code>allmp3song.com</code>, which is truly simple and fast. The only problem was, I can&rsquo;t download the whole movie songs at a time.</p>
+
+<!-- more -->
+
+
+<p> You have to click on each songs and download it manually, which was very frustating. So thought of writing a script. I wrote one in bash which was quite simple by using <code>wget</code>. Then I took this as a self owned task in.</p>
+
+<p>Below is the script, which I wrote, please let me know if any improvement can be done. So far its working like charm..</p>
+
+<figure class='code'><figcaption><span>mp3song.rb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/ruby</span>
+</span><span class='line'><span class="c1"># Date : 18/04/2014</span>
+</span><span class='line'><span class="c1"># Author : Ashish Jaiswal</span>
+</span><span class='line'><span class="c1"># Email ID : ashish1099@gmail.com</span>
+</span><span class='line'><span class="c1"># Purpose : Learning some ruby basics.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;nokogiri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">filelist_id</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot; Sorry..... Please read this carefully</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">Please put album code. To find album code, go to any browser and search for required album.</span>
+</span><span class='line'><span class="s2">Example : </span>
+</span><span class='line'><span class="s2"> http://allmp3song.com/filelist/3330/arijit_singh_-_mtv_unplugged_season_3_%282013%29/new2old/1</span>
+</span><span class='line'><span class="s2">     </span>
+</span><span class='line'><span class="s2">So the album code is 3330&quot;</span>
+</span><span class='line'><span class="nb">exit</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="n">uri_str</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">,</span> <span class="n">limit</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># You should choose a better exception.</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s1">&#39;too many HTTP redirects&#39;</span> <span class="k">if</span> <span class="n">limit</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">encoded_url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">uri_str</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">encoded_url</span><span class="p">)</span>   
+</span><span class='line'>      <span class="n">req</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;User-Agent&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Ruby/</span><span class="si">#{</span><span class="no">RUBY_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">})</span>
+</span><span class='line'>      <span class="n">response</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">http</span><span class="o">|</span>
+</span><span class='line'>          <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">case</span> <span class="n">response</span>
+</span><span class='line'>      <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPSuccess</span> <span class="k">then</span>
+</span><span class='line'>          <span class="n">response</span>
+</span><span class='line'>      <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPRedirection</span> <span class="k">then</span>
+</span><span class='line'>          <span class="n">location</span> <span class="o">=</span> <span class="n">response</span><span class="o">[</span><span class="s1">&#39;location&#39;</span><span class="o">]</span>
+</span><span class='line'>          <span class="nb">puts</span> <span class="s2">&quot;Started downloading ====&gt; ===&gt; ==&gt; </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="k">begin</span>
+</span><span class='line'>              <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">songs_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">saved_file</span> <span class="o">|</span>
+</span><span class='line'>                              <span class="nb">open</span><span class="p">((</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">read_file</span> <span class="o">|</span>
+</span><span class='line'>                                  <span class="n">saved_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">read_file</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>                    
+</span><span class='line'>                                        <span class="k">end</span> <span class="c1"># End of read_file</span>
+</span><span class='line'>                              <span class="k">end</span> <span class="c1"># End of saved_file</span>
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;Saved as </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>   
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;==============================================================================================================&quot;</span>
+</span><span class='line'>          <span class="k">rescue</span> <span class="no">OpenURI</span><span class="o">::</span><span class="no">HTTPError</span>
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;Song is not present on the server.. Sorry :)</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>          <span class="n">response</span><span class="o">.</span><span class="n">value</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">BASE_MP3SONGS_URL</span> <span class="o">=</span> <span class="s2">&quot;http://allmp3song.com&quot;</span>
+</span><span class='line'><span class="no">FILELIST_URL</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/1&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Calling NOKOGIRI to parse HTML </span>
+</span><span class='line'><span class="n">songs_list</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="no">FILELIST_URL</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the album name</span>
+</span><span class='line'><span class="n">album_name</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div#mainDiv h2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\s: Mp3 Songs/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">album_path</span> <span class="o">=</span> <span class="s2">&quot;/home/songs/</span><span class="si">#{</span><span class="n">album_name</span><span class="si">}</span><span class="s2">/&quot;</span>
+</span><span class='line'><span class="no">Dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">album_path</span><span class="p">)</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">album_path</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the list of page of particular albums.</span>
+</span><span class='line'><span class="n">pagination</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.pgn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_i</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Run a loop to get the songs_id and based on id get the songs_name</span>
+</span><span class='line'><span class="c1"># Example http://allmp3song.com/files/download/id/24398</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>  <span class="k">begin</span>    
+</span><span class='line'>      <span class="n">song_id</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName&quot;</span><span class="p">)</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="s2">&quot;href&quot;</span><span class="o">].</span><span class="n">match</span><span class="p">(</span><span class="sr">/\d{3,}/</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">between_url</span> <span class="o">=</span> <span class="s2">&quot;/files/download/id/&quot;</span>
+</span><span class='line'>      <span class="n">url_download</span> <span class="o">=</span> <span class="o">[</span> <span class="no">BASE_MP3SONGS_URL</span><span class="p">,</span> <span class="n">between_url</span><span class="p">,</span> <span class="n">song_id</span> <span class="o">].</span><span class="n">join</span>
+</span><span class='line'>      <span class="n">song_name</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName div &gt; text()&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D$/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">songs_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">print</span> <span class="n">fetch</span><span class="p">(</span><span class="n">url_download</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">rescue</span> <span class="no">NoMethodError</span>
+</span><span class='line'>  <span class="k">end</span> <span class="c1"># End of BEGIN</span>
+</span><span class='line'><span class="k">end</span> <span class="c1"># End of DO</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Looking for Second page.</span>
+</span><span class='line'><span class="k">if</span> <span class="n">pagination</span> <span class="o">&gt;</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="no">FILELIST_URL02</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/2&quot;</span>
+</span><span class='line'>  <span class="n">songs_list02</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="no">FILELIST_URL02</span><span class="p">))</span>
+</span><span class='line'><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>  <span class="k">begin</span>    
+</span><span class='line'>      <span class="n">song_id</span> <span class="o">=</span> <span class="n">songs_list02</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName&quot;</span><span class="p">)</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="s2">&quot;href&quot;</span><span class="o">].</span><span class="n">match</span><span class="p">(</span><span class="sr">/\d{3,}/</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">between_url</span> <span class="o">=</span> <span class="s2">&quot;/files/download/id/&quot;</span>
+</span><span class='line'>      <span class="n">url_download</span> <span class="o">=</span> <span class="o">[</span> <span class="no">BASE_MP3SONGS_URL</span><span class="p">,</span> <span class="n">between_url</span><span class="p">,</span> <span class="n">song_id</span> <span class="o">].</span><span class="n">join</span>
+</span><span class='line'>      <span class="n">song_name</span> <span class="o">=</span> <span class="n">songs_list02</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName div &gt; text()&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D$/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">songs_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">print</span> <span class="n">fetch</span><span class="p">(</span><span class="n">url_download</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">rescue</span> <span class="no">NoMethodError</span>
+</span><span class='line'>      <span class="k">end</span> <span class="c1"># End of BEGIN</span>
+</span><span class='line'>  <span class="k">end</span> <span class="c1"># End of DO</span>
+</span><span class='line'><span class="k">end</span> <span class="c1"># End of IF</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-06-28T03:29:23+05:30'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:29 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/script/'>script</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader/" data-via="" data-counturl="http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet/" title="Previous Post: Managing daemons in heterogeneous linux environment from puppet">&laquo; Managing daemons in heterogeneous linux environment from puppet</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/07/01/how-to-setup-vagrant/" title="Next Post: How to setup Vagrant">How to setup Vagrant &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/26/drbd-automatic-failover-without-cluster/">DRBD Automatic Failover Without Cluster</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/13/my-first-puppet-types-and-providers/">My First Puppet Types and Providers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/">Automate Installation of Perl Modules Using Cpanminus Manager</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/">Ruby subcene.com Subtitle Downloader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server/">Convert CentOS/Scientific Linux to RHEL Server</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://ashish1099.github.io/atom.xml" rel="self"/>
   <link href="http://ashish1099.github.io/"/>
-  <updated>2015-05-23T01:24:40+05:30</updated>
+  <updated>2015-05-23T01:35:39+05:30</updated>
   <id>http://ashish1099.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,5 +12,2058 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[DRBD Automatic Failover Without Cluster]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster/"/>
+    <updated>2014-12-26T13:54:19+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster</id>
+    <content type="html"><![CDATA[<p>I have written a script to do a failover of DRBD resources. This script will get the drbd start mount the partition,
+and start the nfsserver and samba server and the get virtual IP setup.</p>
+
+<p>This script won&rsquo;t be useful for many, which are having a mix envrionment. such as node having some resource as primary and some as secondary.
+Reason behind this, that we where not able to use pacemaker in our current enviornment. Though we are not using this in production enviornment.</p>
+
+<p>Put this in your systemd bootup process. <a href="https://wiki.archlinux.org/index.php/Systemd_FAQ#How_can_I_make_a_script_start_during_the_boot_process.3F">check this</a></p>
+
+<p>Please use it and let me know.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>drbd_auto.sh </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'><span class="c"># Ashish Jaiswal</span>
+</span><span class='line'><span class="c"># Date 16th Dec 2014</span>
+</span><span class='line'><span class="c"># This script expects the primary host to be primary node</span>
+</span><span class='line'><span class="c"># for all the drbd resources.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># List of resource on the node.</span>
+</span><span class='line'><span class="nv">res</span><span class="o">=</span><span class="k">$(</span>cat /etc/drbd.d/*.res <span class="p">|</span> grep resource <span class="p">|</span> cut -d <span class="s2">&quot; &quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># eth1 is the interface which we going to assign floating IP</span>
+</span><span class='line'><span class="nv">device_id</span><span class="o">=</span>eth1
+</span><span class='line'>
+</span><span class='line'><span class="c"># This is the floating IP</span>
+</span><span class='line'><span class="nv">ip</span><span class="o">=</span><span class="s2">&quot;192.168.1.100&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> services <span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Declaring an array of the services, we want to be stop or start</span>
+</span><span class='line'>  <span class="nv">service_name</span><span class="o">=(</span>nfsserver smb nmb<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> var in <span class="k">${</span><span class="nv">service_name</span><span class="p">[@]</span><span class="k">}</span>
+</span><span class='line'>  <span class="k">do</span>
+</span><span class='line'>    systemctl is-active <span class="nv">$var</span> <span class="p">|</span> grep ^active &gt; /dev/null
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      systemctl <span class="nv">$1</span> <span class="nv">$var</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>  <span class="k">done</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> check_ip <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Check whether the ip is present or not</span>
+</span><span class='line'>  <span class="nv">primary_ip</span><span class="o">=</span><span class="k">$(</span>ip -o -4 addr show <span class="nv">$device_id</span> <span class="p">|</span> awk -F <span class="s1">&#39;[ /]+&#39;</span> <span class="s1">&#39;/global/ {print $4}&#39;</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># Add ip if is not present </span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$primary_ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>   ip address add <span class="nv">$ip</span> dev <span class="nv">$device_id</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> mount_status <span class="o">{</span>
+</span><span class='line'>  mountpoint -q /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      mount /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> drbd_failover <span class="o">{</span>
+</span><span class='line'>  drbdadm primary --force <span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>    <span class="nb">echo</span> -e <span class="s2">&quot;There seems to be some major problem,\nPlease login to `hostname` and fix the error.&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD failover Unsuccessful&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>    <span class="nb">exit </span>1
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> resource in <span class="nv">$res</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c"># To get the current state of the resources.</span>
+</span><span class='line'>  <span class="nv">pri_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f <span class="m">1</span> <span class="p">|</span> egrep <span class="s2">&quot;Unknown|Primary|Secondary&quot;</span><span class="k">)</span>
+</span><span class='line'>  <span class="nv">sec_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f <span class="m">2</span> <span class="p">|</span> egrep <span class="s2">&quot;Unknown|Primary|Secondary&quot;</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># If the node has a primary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    mount_status <span class="nv">$resource</span>
+</span><span class='line'>    services start
+</span><span class='line'>    check_ip
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;This is primary node for $resource resource on `hostname`&quot;</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># If the node has a secondary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Secondary <span class="o">]</span> <span class="o">||</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    ping -c2 <span class="nv">$ip</span> &gt; /dev/null <span class="o">&amp;&amp;</span> mountpoint -q /<span class="nv">$resource</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span>
+</span><span class='line'>    <span class="k">then</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;$resource is available on Primary, This is a secondary node.&quot;</span>
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        drbd_failover <span class="nv">$resource</span>
+</span><span class='line'>        mount_status <span class="nv">$resource</span>
+</span><span class='line'>        services start
+</span><span class='line'>        check_ip
+</span><span class='line'>        logger <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD Successful Failover&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Secondary <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        <span class="nb">echo</span> -e <span class="s2">&quot;Split brain detected, Please fix manually\n\nAll these command need to be ran\n# drbdadm secondary &lt;resource&gt;\n# drbdadm connect --discard-my-data &lt;resource&gt;\n\nOn the other node (the split brain survivor), if its connection state is also StandAlone\n# drbdadm connect &lt;resource&gt;\n\nHere is drbd doc link http://www.drbd.org/users-guide/s-resolve-split-brain.html&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD SplitBrain Detected&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      services stop
+</span><span class='line'>      logger <span class="s2">&quot;This is seconday node of $resource. So nothing to be done on this server, because Primary is Active at this moment&quot;</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[My First Puppet Types and Providers]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/11/13/my-first-puppet-types-and-providers/"/>
+    <updated>2014-11-13T16:34:57+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/11/13/my-first-puppet-types-and-providers</id>
+    <content type="html"><![CDATA[<p>This is first time I wrote the type and provider for a simple installation of the perl libraries
+directly from cpan.</p>
+
+<!-- more -->
+
+
+<p>This is tree structure of the cpan module.</p>
+
+<figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="na">puppetmaster</span><span class="p">:</span><span class="o">/</span><span class="na">etc</span><span class="o">/</span><span class="na">puppet</span><span class="o">/</span><span class="na">master</span><span class="o">/</span><span class="na">modules</span><span class="o">/</span><span class="na">cpan</span><span class="c"> # tree</span>
+</span><span class='line'><span class="err">.</span>
+</span><span class='line'><span class="err">├──</span> <span class="na">lib</span>
+</span><span class='line'><span class="err">│  </span> <span class="err">└──</span> <span class="na">puppet</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">├──</span> <span class="na">provider</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">│  </span> <span class="err">└──</span> <span class="na">cpan</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">│  </span>     <span class="err">└──</span> <span class="na">cpan</span><span class="err">.</span><span class="na">rb</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">└──</span> <span class="na">type</span>
+</span><span class='line'><span class="err">│  </span>         <span class="err">└──</span> <span class="na">cpan</span><span class="err">.</span><span class="na">rb</span>
+</span><span class='line'><span class="err">└──</span> <span class="na">manifests</span>
+</span><span class='line'>    <span class="err">└──</span> <span class="na">init</span><span class="err">.</span><span class="na">pp</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">6</span> <span class="na">directories</span><span class="p">,</span> <span class="mi">3</span> <span class="na">files</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># lib/puppet/provider/cpan/cpan.rb </span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;puppet/provider/package&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Puppet</span><span class="o">::</span><span class="no">Type</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="ss">:cpan</span><span class="p">)</span><span class="o">.</span><span class="n">provide</span><span class="p">(</span><span class="ss">:cpan</span><span class="p">,</span> <span class="ss">:parent</span> <span class="o">=&gt;</span> <span class="no">Puppet</span><span class="o">::</span><span class="no">Provider</span><span class="o">::</span><span class="no">Package</span> <span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">desc</span> <span class="s2">&quot;Installation of perl modules from cpan&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">commands</span> <span class="ss">:cpanm</span> <span class="o">=&gt;</span> <span class="s2">&quot;/usr/bin/cpanm&quot;</span> <span class="k">if</span> <span class="no">Puppet</span><span class="o">::</span><span class="no">FileSystem</span><span class="o">.</span><span class="n">exist?</span> <span class="s1">&#39;/usr/bin/cpanm&#39;</span>
+</span><span class='line'>  <span class="n">commands</span> <span class="ss">:perldoc</span> <span class="o">=&gt;</span> <span class="s2">&quot;perldoc&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># TODO add cpan as different way of installation.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>      <span class="n">cpanm</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>      <span class="n">cpanm</span><span class="p">(</span><span class="s1">&#39;-U&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">exists?</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>          <span class="n">perldoc</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>          <span class="kp">true</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="no">Puppet</span><span class="o">::</span><span class="no">ExecutionFailure</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>          <span class="kp">false</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>cpan.rb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># lib/puppet/type/cpan.rb</span>
+</span><span class='line'><span class="no">Puppet</span><span class="o">::</span><span class="no">Type</span><span class="o">.</span><span class="n">newtype</span><span class="p">(</span><span class="ss">:cpan</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="vi">@doc</span> <span class="o">=</span> <span class="s2">&quot;Manage the installation and uninstallation of perl libraries from cpan repository using cpanminus manager,</span>
+</span><span class='line'><span class="s2">     you can pass your own local cpan repository. </span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">     Valid options :- </span>
+</span><span class='line'><span class="s2">     1. &#39;ensure&#39; =&gt; present||absent       # Present is the default options, absent will uninstall the perl libraries.</span>
+</span><span class='line'><span class="s2">     2. &#39;version&#39; =&gt; latest           # Latest version of perl libraries will get installed, if you want you can pass the version number.</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">     Example: </span>
+</span><span class='line'><span class="s2">         cpan { &#39;Text::ASCIITable&#39; : ensure =&gt; present }</span>
+</span><span class='line'><span class="s2">         cpan { &#39;Text::ASCIITable&#39; : ensure =&gt; present, version =&gt; &#39;1.0.1&#39;} &quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">ensurable</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">defaultvalues</span>
+</span><span class='line'>      <span class="n">defaultto</span> <span class="ss">:present</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">newparam</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:namevar</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">desc</span> <span class="s2">&quot;Name of the Perl library&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">newproperty</span><span class="p">(</span><span class="ss">:version</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">desc</span> <span class="s2">&quot;Specify version number&quot;</span>
+</span><span class='line'>      <span class="n">validate</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+</span><span class='line'>          <span class="nb">fail</span><span class="p">(</span><span class="s2">&quot;Invalid version </span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">unless</span> <span class="n">value</span> <span class="o">=~</span> <span class="sr">/^[0-9A-Za-z\.:-]+$/</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Automate Installation of Perl Modules Using Cpanminus Manager]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/"/>
+    <updated>2014-11-11T21:31:46+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus</id>
+    <content type="html"><![CDATA[<p>This manifest will help you to install perl libraries directly from cpan, You can set you cpan local repository or you can use any cpan mirror out there.
+All I did is created a defination to install the perl libraries from cpan repository.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="c"># Install perl modules from cpan</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="na">cpan</span> <span class="p">{</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">package</span> <span class="p">{</span> <span class="p">[</span> <span class="s">&#39;perl-YAML-Perl&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Error&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-DistnameInfo&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-Meta-Check&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&#39;perl-File-pushd&#39;</span><span class="p">,</span> <span class="s">&#39;perl-local-lib&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Module-CPANfile&#39;</span><span class="p">,</span> <span class="s">&#39;perl-App-cpanminus&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&#39;perl-aliased&#39;</span><span class="p">,</span> <span class="s">&#39;make&#39;</span> <span class="p">]</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">define</span> <span class="na">perl</span> <span class="p">(</span> <span class="nv">$cpan_repo</span> <span class="o">=</span> <span class="s">&quot;http://mirror.teklinks.com/CPAN/&quot;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">exec</span> <span class="p">{</span> <span class="s">&quot;$name&quot;</span> <span class="p">:</span>
+</span><span class='line'>          <span class="na">command</span> <span class="o">=&gt;</span> <span class="s">&quot;cpanm --mirror $cpan_repo --mirror-only $name&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="na">require</span> <span class="o">=&gt;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;make&quot;</span><span class="p">,</span> <span class="s">&quot;perl-App-cpanminus&quot;</span> <span class="p">],</span>
+</span><span class='line'>          <span class="na">unless</span> <span class="o">=&gt;</span> <span class="s">&quot;perldoc -l $name&quot;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span><span class="c"> # End of cpan_perl</span>
+</span><span class='line'><span class="p">}</span><span class="c"> #End of perl</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can add like this in your example.pp</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="na">cpan</span><span class="p">::</span><span class="na">perl</span> <span class="p">{</span> <span class="s">&quot;Text::ASCIITable&quot;</span> <span class="p">:</span>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby subcene.com Subtitle Downloader]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/"/>
+    <updated>2014-10-15T09:14:28+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader</id>
+    <content type="html"><![CDATA[<p>I have written a ruby script in which it will download the subtitle as you need. To demonstrate more in this, I would like to share  why I did this. Because I was tried of going onto subscene.com
+and searching for a movie and then download the subtitle and then unzip it. which was very painful for me.</p>
+
+<p>This let me write a small ruby wrapper to do all this thing automatically. This basically takes 4 arguments, like <code>--movie_name</code> <code>--year</code> <code>--resolution</code> and if you want any specific ripper subtitle then you can pass <code>--author</code>.
+Just copy this script under <code>$PATH</code> and run <code>subscene</code> like this</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># subscene </span>
+</span><span class='line'>Missing options: movie_name, year, resolution
+</span><span class='line'>*** Subcene subtitle downloader ***
+</span><span class='line'>Usage : subscene -m deliver-us-from-evil -y <span class="m">2014</span> -r 720
+</span><span class='line'>    -m, --movie_name                 Name of the Movie
+</span><span class='line'>    -y, --year                       Year of the Movie
+</span><span class='line'>    -r, --resolution                 Resolution of the Movie
+</span><span class='line'>    -a, --author                     Author/Ripper of the Movie
+</span><span class='line'>    -h, --help                       Display this screen
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This show that it is looking for some arguments, so we will pass it then. As an example, I&rsquo;m taking this movie <code>22 Jump Street</code></p>
+
+<p><strong>NOTE</strong> :
+Movie name should be in this format <code>"22-jump-street"</code> <code>"gotham-first-season"</code> <code>"lost-sixth-season"</code> or <code>"deliver-us-from-evil"</code></p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># subscene -m 22-jump-street -y 2014 -r 720 -a YIFY`</span>
+</span><span class='line'>Successfully saved 22.Jump.Street.2014.720p.BluRay.x264-SPARKS.srt at /home/Movies/
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>subscene </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/ruby</span>
+</span><span class='line'><span class="c1"># Ashish Jaiswal</span>
+</span><span class='line'><span class="c1"># Date 12-10-2014</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;nokogiri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;zip&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;optparse&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">red</span><span class="p">;</span>            <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[31m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">green</span><span class="p">;</span>          <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[32m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">brown</span><span class="p">;</span>          <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[33m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">optparse</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">opts</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">banner</span> <span class="o">=</span> <span class="s2">&quot;*** Subcene subtitle downloader ***</span><span class="se">\n</span><span class="s2">Usage : subscene -m deliver-us-from-evil -y 2014 -r 720&quot;</span><span class="o">.</span><span class="n">green</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;--movie_name movie_name&quot;</span><span class="p">,</span> <span class="s2">&quot;Name of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">movie</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span> <span class="o">=</span>  <span class="n">movie</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-y&quot;</span><span class="p">,</span> <span class="s2">&quot;--year year&quot;</span><span class="p">,</span> <span class="s2">&quot;Year of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">year</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:year</span><span class="o">]</span> <span class="o">=</span> <span class="n">year</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--resolution res&quot;</span><span class="p">,</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">DecimalInteger</span><span class="p">,</span> <span class="s2">&quot;Resolution of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">res</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:resolution</span><span class="o">]</span> <span class="o">=</span> <span class="n">res</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--author author&quot;</span><span class="p">,</span> <span class="s2">&quot;Author/Ripper of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">author</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:author</span><span class="o">]</span> <span class="o">=</span> <span class="n">author</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># This displays the help screen, all programs are assumed to have this option.</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span> <span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;--help&#39;</span><span class="p">,</span> <span class="s1">&#39;Display this screen&#39;</span><span class="o">.</span><span class="n">brown</span> <span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">opts</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">optparse</span><span class="o">.</span><span class="n">parse!</span>
+</span><span class='line'>  <span class="n">mandatory</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:movie_name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">,</span> <span class="ss">:resolution</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">missing</span> <span class="o">=</span> <span class="n">mandatory</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span> <span class="n">param</span> <span class="o">|</span> <span class="n">options</span><span class="o">[</span><span class="n">param</span><span class="o">].</span><span class="n">nil?</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Missing options: </span><span class="si">#{</span><span class="n">missing</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">red</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">optparse</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">ParseError</span><span class="p">,</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">MissingArgument</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Error: </span><span class="si">#{</span><span class="vg">$!</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># To open the link and parse</span>
+</span><span class='line'><span class="n">subscene_page</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;http://subscene.com/subtitles/</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span><span class="si">}</span><span class="s2">/english&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># To get the first Movie Name with Ripper</span>
+</span><span class='line'><span class="n">subscene_name</span> <span class="o">=</span> <span class="n">subscene_page</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.content.clearfix table tbody tr td.a1 a span&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span> <span class="nb">p</span> <span class="o">|</span> <span class="nb">p</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;English&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span> <span class="p">}</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:year</span><span class="o">]</span><span class="si">}</span><span class="sr">.</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:resolution</span><span class="o">]</span><span class="si">}</span><span class="sr">p.BluRay.x264-</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:author</span><span class="o">]</span><span class="si">}</span><span class="sr">/</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Hash method used to bind name and url</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[</span><span class="n">subscene_page</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;div.content.clearfix table tbody tr td.a1 a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span> <span class="o">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;English&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">i</span><span class="o">[</span><span class="s1">&#39;href&#39;</span><span class="o">]]</span> <span class="p">}</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Getting the actual link </span>
+</span><span class='line'><span class="n">subtitle_link</span> <span class="o">=</span> <span class="s2">&quot;http://subscene.com</span><span class="si">#{</span><span class="n">a</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/[\[\]\&quot;]/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Parsing the actual link</span>
+</span><span class='line'><span class="n">download_page</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subtitle_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Getting the download link</span>
+</span><span class='line'><span class="n">download_link</span> <span class="o">=</span> <span class="n">download_page</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.download a&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="s1">&#39;href&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Saving the file</span>
+</span><span class='line'><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">file</span> <span class="o">&lt;&lt;</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;http://subscene.com/</span><span class="si">#{</span><span class="n">download_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Unzipping it</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">unzip_file</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+</span><span class='line'><span class="no">Zip</span><span class="o">::</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">zip_file</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">zip_file</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">f_path</span><span class="o">=</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">f_path</span><span class="p">))</span>
+</span><span class='line'>  <span class="n">zip_file</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_path</span><span class="p">)</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+</span><span class='line'>  <span class="vg">$zipname</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Remove the stall zip file after unzipping</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">remove_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Actual Movie to grep and copy file</span>
+</span><span class='line'><span class="n">movie_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the movie path in /home/Movies directory</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Dir</span><span class="o">.</span><span class="n">entries</span><span class="p">(</span><span class="s1">&#39;/home/Movies&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span><span class="o">|</span><span class="n">entry</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span> <span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;/home/Movies&#39;</span><span class="p">,</span><span class="n">entry</span><span class="p">)</span> <span class="ow">and</span> <span class="o">!</span><span class="p">(</span><span class="n">entry</span> <span class="o">==</span><span class="s1">&#39;.&#39;</span> <span class="o">||</span> <span class="n">entry</span> <span class="o">==</span> <span class="s1">&#39;..&#39;</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/</span><span class="si">#{</span><span class="n">movie_path</span><span class="si">}</span><span class="sr">/i</span><span class="p">)</span>
+</span><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="s2">&quot;/home/Movies/&quot;</span>
+</span><span class='line'><span class="n">joinner</span> <span class="o">=</span> <span class="o">[</span> <span class="nb">p</span><span class="p">,</span> <span class="n">a</span><span class="o">].</span><span class="n">join</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Calling the defination</span>
+</span><span class='line'><span class="n">unzip_file</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span> <span class="n">joinner</span><span class="p">)</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;Successfully saved </span><span class="si">#{</span><span class="vg">$zipname</span><span class="si">}</span><span class="s2"> at </span><span class="si">#{</span><span class="n">joinner</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="n">remove_file</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Convert CentOS/Scientific Linux to RHEL Server]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server/"/>
+    <updated>2014-09-19T15:54:26+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server</id>
+    <content type="html"><![CDATA[<p>We have ran into scenario where we wanted to convert a CentOS box to RHEL box.
+So sharing my experience out here.</p>
+
+<p>There are some pre-requisite</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rpm -qa centos<span class="se">\*</span>
+</span><span class='line'>centos-indexhtml-6-1.el6.centos.noarch
+</span><span class='line'>centos-release-6-5.el6.centos.11.2.x86_64
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>We will need some redhat packages to start off. You can retrive this packages from installation media or you can logging to RHN and download these packages.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>libgudev1-147-2.51.el6.x86_64.rpm
+</span><span class='line'>pygobject2-2.20.0-5.el6.x86_64.rpm
+</span><span class='line'>redhat-release-server-6Server-6.5.0.1.el6.x86_64.rpm
+</span><span class='line'>rhn-setup-1.0.0.1-8.el6.noarch.rpm
+</span><span class='line'>yum-rhn-plugin-0.9.1-49.el6.noarch.rpm
+</span><span class='line'>m2crypto-0.20.2-9.el6.x86_64.rpm
+</span><span class='line'>python-dmidecode-3.10.13-3.el6_4.x86_64.rpm
+</span><span class='line'>rhn-check-1.0.0.1-8.el6.noarch.rpm
+</span><span class='line'>rhnlib-2.5.22-15.el6.noarch.rpm
+</span><span class='line'>pyOpenSSL-0.10-2.el6.x86_64.rpm
+</span><span class='line'>python-gudev-147.1-4.el6_0.1.x86_64.rpm
+</span><span class='line'>rhn-client-tools-1.0.0.1-8.el6.noarch.rpm
+</span><span class='line'>rhnsd-4.9.3-2.el6.x86_64.rpm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>First we will remove CentOS packages</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> rpm -e --nodeps centos-release centos-indexhtml pygobject2 pyOpenSSL libgudev1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Install those redhat packages, I had these packages at <code>/root/rhel</code>, after installing those packages we will clean yum cache.</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> <span class="nb">cd</span> /root/rhel
+</span><span class='line'>  rpm -ivh *
+</span><span class='line'>  yum clean all
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Then you will have to register the box to RHN</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rhn_register
+</span><span class='line'>cat /etc/redhat-release
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Just assigning an optional channel to RHEL box.</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rhn-channel -a -c rhel-x86_64-server-optional-6
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Just run an update, to get updates from RedHat Network</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum update
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>The below command, will put all the other packages names with version number, and we will reinstall those with RedHat repository</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rpm -qa --qf <span class="s2">&quot;%{NAME} %{VENDOR}\n&quot;</span> <span class="p">|</span> grep CentOS <span class="p">|</span> cut -d<span class="s1">&#39; &#39;</span> -f1 <span class="p">|</span> grep -v ^kernel <span class="p">|</span> sort <span class="p">|</span> tee lst
+</span><span class='line'>yum reinstall <span class="k">$(</span>cat lst<span class="k">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>We will run a distro-sync for the left out package.</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>yum distro-sync
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Just to ensure if there is any left out package which is not reinstall from RedHat repos. In some case there maybe some, just subscribe to those required channels and your are good to go.
+Then just reboot the box.</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>rpm -qa --qf <span class="s2">&quot;%{NAME} %{VENDOR}\n&quot;</span> <span class="p">|</span> grep CentOS <span class="p">|</span> cut -d<span class="s1">&#39; &#39;</span> -f1 <span class="p">|</span> grep -v ^kernel <span class="p">|</span> wc -l
+</span><span class='line'>0
+</span><span class='line'>yum update
+</span><span class='line'>No Packages marked <span class="k">for</span> Update
+</span><span class='line'>yum repolist
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://blog.famillecollet.com/post/2013/09/21/Switch-from-CentOS-6.4-to-RHEL-6.4">http://blog.famillecollet.com/post/2013/09/21/Switch-from-CentOS-6.4-to-RHEL-6.4</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bind DNS With Puppet on Opensuse]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse/"/>
+    <updated>2014-07-23T10:52:05+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse</id>
+    <content type="html"><![CDATA[<p>This blog is about setting up a DNS server with puppet module. I have written a manifesto to get the job done.
+You can add more if you like.</p>
+
+<p><code>Requirements</code></p>
+
+<ol>
+<li>OpenSuse OS.</li>
+<li>Puppet Server</li>
+</ol>
+
+
+<p>You can install bind manually like this and then configure it. But if you have multiple DNS server, then puppet can be handy.
+Currently my manifest only manage configuration file. Will add support to manage the zone files too.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>root@ashish1099:~<span class="o">]</span> zypper install <span class="nb">bind</span>
+</span><span class='line'>Loading repository data...
+</span><span class='line'>Reading installed packages...
+</span><span class='line'>Resolving package dependencies...
+</span><span class='line'>
+</span><span class='line'>The following <span class="m">2</span> NEW packages are going to be installed:
+</span><span class='line'>  <span class="nb">bind bind</span>-chrootenv
+</span><span class='line'>
+</span><span class='line'><span class="m">2</span> new packages to install.
+</span><span class='line'>Overall download size: 316.3 KiB. After the operation, additional 717.7 KiB will be used.
+</span><span class='line'>Continue? <span class="o">[</span>y/n/? shows all options<span class="o">]</span> <span class="o">(</span>y<span class="o">)</span>: y
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64                                                                                                                                                   <span class="o">(</span>1/2<span class="o">)</span>,  33.4 KiB <span class="o">(</span>  1.6 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64.rpm ....................................................................................................................................................................................<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64                                                                                                                                                             <span class="o">(</span>2/2<span class="o">)</span>, 282.9 KiB <span class="o">(</span>716.1 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64.rpm ..............................................................................................................................................................................................<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'><span class="o">(</span>1/2<span class="o">)</span> Installing: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1 .........................................................................................................................................................................................<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named...
+</span><span class='line'>Updating /etc/sysconfig/syslog...
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">(</span>2/2<span class="o">)</span> Installing: <span class="nb">bind</span>-9.9.4P2-2.8.1 ...................................................................................................................................................................................................<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named...
+</span><span class='line'>wrote key file <span class="s2">&quot;/etc/rndc.key&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="c"># Server::dns</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="na">server</span><span class="p">::</span><span class="na">dns</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">package</span> <span class="p">{</span> <span class="s">&quot;bind&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>        <span class="k">service</span> <span class="p">{</span> <span class="s">&quot;named.service&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">enable</span> <span class="o">=&gt;</span> <span class="k">true</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">define</span> <span class="na">conf</span> <span class="p">(</span>
+</span><span class='line'>                        <span class="nv">$directory</span>              <span class="o">=</span> <span class="s">&quot;/var/lib/named&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="nv">$managed_keys_directory</span> <span class="o">=</span> <span class="s">&quot;/var/lib/named/dyn/&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="nv">$dump_file</span>              <span class="o">=</span> <span class="s">&quot;/var/log/named_dump.db&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="nv">$statistics_file</span>        <span class="o">=</span> <span class="s">&quot;/var/log/named.stats&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="nv">$forwarders</span>             <span class="o">=</span> <span class="p">[],</span>
+</span><span class='line'>                        <span class="nv">$forward</span>                <span class="o">=</span> <span class="s">&quot;only&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="nv">$listen_on_v6</span>           <span class="o">=</span> <span class="s">&quot;none&quot;</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">File</span> <span class="p">{</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">present</span><span class="p">,</span> <span class="na">require</span> <span class="o">=&gt;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;bind&quot;</span><span class="p">],</span> <span class="k">notify</span> <span class="o">=&gt;</span> <span class="k">Service</span><span class="p">[</span><span class="s">&quot;named.service&quot;</span><span class="p">]</span> <span class="p">}</span><span class="c"></span>
+</span><span class='line'>
+</span><span class='line'><span class="c">        # Configuration files</span>
+</span><span class='line'>        <span class="k">file</span> <span class="p">{</span> <span class="nv">$name</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">present</span><span class="p">,</span> <span class="na">content</span> <span class="o">=&gt;</span> <span class="k">template</span><span class="p">(</span><span class="s">&quot;server/dns/named_conf.erb&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>        <span class="k">file</span> <span class="p">{</span> <span class="s">&quot;/etc/named.d/rndc-access.conf&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}</span><span class="c"> # End of server::dns::conf defination</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">        # Root Zone</span>
+</span><span class='line'>        <span class="na">conf</span> <span class="p">{</span> <span class="s">&#39;/etc/named.conf&#39;</span> <span class="p">:</span>
+</span><span class='line'>                        <span class="na">forwarders</span>      <span class="o">=&gt;</span> <span class="s">&quot;192.168.1.2&quot;</span><span class="p">,</span>
+</span><span class='line'>                        <span class="na">zones</span>           <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>                        <span class="s">&#39;.&#39;</span>                     <span class="o">=&gt;</span> <span class="p">[</span> <span class="s">&#39;type hint&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;root.hint&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                        # Forward Zone</span>
+</span><span class='line'>                        <span class="s">&#39;localhost&#39;</span>             <span class="o">=&gt;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;localhost.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                        <span class="s">&#39;example.com&#39;</span>           <span class="o">=&gt;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/example.com&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                        # Reverse Zone</span>
+</span><span class='line'>                        <span class="s">&#39;0.0.127.in-addr.arpa&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;127.0.0.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                        <span class="s">&#39;1.168.192.in-addr.arpa&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/192.168.1.rev&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                         <span class="p">}</span><span class="c"> # End of Zones</span>
+</span><span class='line'>  <span class="p">}</span><span class="c"> # End of conf </span>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of DNS</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>named_conf.erb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x"># Generated by Puppet</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">options {</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">  directory &quot;</span><span class="cp">&lt;%=</span><span class="vi">@directory</span><span class="cp">%&gt;</span><span class="x">&quot;;</span>
+</span><span class='line'><span class="x">  managed-keys-directory &quot;</span><span class="cp">&lt;%=</span><span class="vi">@managed_keys_directory</span><span class="cp">%&gt;</span><span class="x">&quot;;</span>
+</span><span class='line'><span class="x">  dump-file &quot;</span><span class="cp">&lt;%=</span><span class="vi">@dump_file</span><span class="cp">%&gt;</span><span class="x">&quot;;</span>
+</span><span class='line'><span class="x">  statistics-file &quot;</span><span class="cp">&lt;%=</span><span class="vi">@statistics_file</span><span class="cp">%&gt;</span><span class="x">&quot;;</span>
+</span><span class='line'><span class="x">  forwarders { </span><span class="cp">&lt;%=</span><span class="vi">@forwarders</span><span class="cp">%&gt;</span><span class="x">; };</span>
+</span><span class='line'><span class="x">  forward </span><span class="cp">&lt;%=</span><span class="vi">@forward</span><span class="cp">%&gt;</span><span class="x">;</span>
+</span><span class='line'><span class="x">  listen-on-v6 { </span><span class="cp">&lt;%=</span><span class="vi">@listen_on_v6</span><span class="cp">%&gt;</span><span class="x">; };</span>
+</span><span class='line'><span class="x">  notify no;</span>
+</span><span class='line'><span class="x">  disable-empty-zone &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA&quot;;</span>
+</span><span class='line'><span class="x">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">if</span> <span class="o">!</span><span class="vi">@zones</span><span class="o">.</span><span class="n">empty?</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">/* Global zones */</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="vi">@zones</span><span class="o">.</span><span class="n">sort_by</span> <span class="p">{</span><span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span> <span class="n">key</span><span class="p">}</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="o">|</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">zone &quot;</span><span class="cp">&lt;%=</span> <span class="n">key</span> <span class="cp">%&gt;</span><span class="x">&quot; in {</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="n">value</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">line</span><span class="o">|</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">line</span> <span class="cp">%&gt;</span><span class="x">;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">-%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Apache 2.4 With Mod_QOS]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/16/apache-2-dot-4-with-mod-qos/"/>
+    <updated>2014-07-16T13:01:49+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/16/apache-2-dot-4-with-mod-qos</id>
+    <content type="html"><![CDATA[<p>Just a basic info about qos.</p>
+
+<ol>
+<li>Create policy based on number of request or on bandwidth and lot more.</li>
+<li>Event request controlling Mechanism</li>
+<li>Mitigate DDoS attacks.</li>
+</ol>
+
+
+<p><a href="http://opensource.adnovum.ch/mod_qos/">More can be found over here</a></p>
+
+<!-- more -->
+
+
+<p>Current working enviornment is OpenSuSE 13.1 with Apache 2.4</p>
+
+<p>Install Apache</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>zypper install apache2 apache2-worker
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Download latest mod_qos <a href="http://sourceforge.net/projects/mod-qos/files/">from this location</a></p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>tar xvf mod_qos-11.4.tar.gz
+</span><span class='line'><span class="nb">cd </span>mod_qos-11.4
+</span><span class='line'><span class="nb">cd </span>mod_qos-11.4/apache2 <span class="o">&amp;&amp;</span> /usr/sbin/apxs2 -I /usr/include/apache2-worker/ -ci mod_qos.c<span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">/usr/lib64/apr-1/build/libtool --silent --mode=compile gcc -std=gnu99 -prefer-pic -fmessage-length=0 -grecord-gcc-switches -fstack-protector -O2 -Wall -D_FORTIFY_SOURCE=2 -funwind-tables -fasynchronous-unwind-tables -g -fPIC -Wall -DLDAP_DEPRECATED  -DLINUX -D_REENTRANT -D_GNU_SOURCE -pthread -I/usr/include/apache2  -I/usr/include/apr-1   -I/usr/include/apr-1 -I/usr/include -I/usr/include/apache2-worker/  -c -o mod_qos.lo mod_qos.c &amp;&amp; touch mod_qos.slo</span>
+</span><span class='line'><span class="s2">/usr/lib64/apr-1/build/libtool --silent --mode=link gcc -std=gnu99    -o mod_qos.la  -rpath /usr/lib64/apache2 -module -avoid-version    mod_qos.lo</span>
+</span><span class='line'><span class="s2">/usr/share/apache2/build/instdso.sh SH_LIBTOOL=&#39;/usr/lib64/apr-1/build/libtool&#39; mod_qos.la /usr/lib64/apache2</span>
+</span><span class='line'><span class="s2">/usr/lib64/apr-1/build/libtool --mode=install install mod_qos.la /usr/lib64/apache2/</span>
+</span><span class='line'><span class="s2">libtool: install: install .libs/mod_qos.so /usr/lib64/apache2/mod_qos.so</span>
+</span><span class='line'><span class="s2">libtool: install: install .libs/mod_qos.lai /usr/lib64/apache2/mod_qos.la</span>
+</span><span class='line'><span class="s2">libtool: finish: PATH=&quot;</span>/sbin:/usr/sbin:/usr/local/sbin:/root/bin:/usr/local/bin:/usr/bin:/bin:/usr/X11R6/bin:/usr/games:/opt/bin:/sbin<span class="err">&quot;</span> ldconfig -n /usr/lib64/apache2
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Libraries have been installed in:
+</span><span class='line'>   /usr/lib64/apache2
+</span><span class='line'>
+</span><span class='line'>If you ever happen to want to link against installed libraries
+</span><span class='line'>in a given directory, LIBDIR, you must either use libtool, and
+</span><span class='line'>specify the full pathname of the library, or use the <span class="sb">`</span>-LLIBDIR<span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">flag during linking and do at least one of the following:</span>
+</span><span class='line'><span class="s1">   - add LIBDIR to the `LD_LIBRARY_PATH&#39;</span> environment variable
+</span><span class='line'>     during execution
+</span><span class='line'>   - add LIBDIR to the <span class="sb">`</span>LD_RUN_PATH<span class="s1">&#39; environment variable</span>
+</span><span class='line'><span class="s1">     during linking</span>
+</span><span class='line'><span class="s1">   - use the `-Wl,-rpath -Wl,LIBDIR&#39;</span> linker flag
+</span><span class='line'>   - have your system administrator add LIBDIR to <span class="sb">`</span>/etc/ld.so.conf<span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'>See any operating system documentation about shared libraries <span class="k">for</span>
+</span><span class='line'>more information, such as the ld<span class="o">(</span>1<span class="o">)</span> and ld.so<span class="o">(</span>8<span class="o">)</span> manual pages.
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>chmod <span class="m">755</span> /usr/lib64/apache2/mod_qos.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you see the Output like this that means mod_qos is installed and you just have to load it in apache.</p>
+
+<p>We will add a line in this file <code>/etc/apache2/sysconfig.d/loadmodule.conf</code></p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>LoadModule qos_module                     /usr/lib64/apache2/mod_qos.so
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can load mod_qos for all the virtualhost or to any specific virtualhost. I&rsquo;m adding to a specific one.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>    ServerName        www.example.com
+</span><span class='line'>    DocumentRoot      /web/example.com/
+</span><span class='line'>    ServerAdmin       webmaster@example.com
+</span><span class='line'>    ErrorLog          /var/log/apache2/example.com-error_log
+</span><span class='line'>    TransferLog       /var/log/apache2/example.com-access_log
+</span><span class='line'>    ServerSignature   Off
+</span><span class='line'>    HostnameLookups   Off
+</span><span class='line'>    Options           -Indexes -FollowSymLinks
+</span><span class='line'>    <span class="c">#-------------------------</span>
+</span><span class='line'>    &lt;Directory <span class="s2">&quot;/web/example.com&quot;</span>&gt;
+</span><span class='line'>        Allow        from all
+</span><span class='line'>    &lt;/Directory&gt;
+</span><span class='line'>    &lt;IfModule mod_qos.c&gt;
+</span><span class='line'>        &lt;Location /qos&gt;
+</span><span class='line'>           SetHandler qos-viewer
+</span><span class='line'>        &lt;/Location&gt;
+</span><span class='line'>    &lt;/IfModule&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can check the status of mod_qos on this link. <strong>NOTE</strong> change the domainname.</p>
+
+<p><code>http://domain.name.com/qos?option=ip&amp;action=enable&amp;refresh=</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How to Setup Vagrant]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant/"/>
+    <updated>2014-07-01T12:38:48+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant</id>
+    <content type="html"><![CDATA[<p>What is Vagrant ?</p>
+
+<p>The big question, which I was thinking, when I first heard of it. So today finally got a chance to do some hands on.
+Basically it is a tools which gives you running VM, whenever you need it with all your environment set in place.
+So what was that huh? Consider that you are creating a VM or clonning a VM and starting it up and running some script to get
+the environment set in place. So why not automate this whole thing by vagrant.</p>
+
+<p>Vagrant allows you to launch VMs with provisioning on top of it.</p>
+
+<!-- more -->
+
+
+<p><img src="https://raw.githubusercontent.com/ashish1099/ashish1099.github.io/master/images/blog_images/logo_vagrant.png" alt="Image" /></p>
+
+<p><strong>Some Nomenclature</strong></p>
+
+<p><em><code>box</code></em> : Base image of an OS, <a href="https://docs.vagrantup.com/v2/boxes.html">Read here</a></p>
+
+<p><em><code>Provider</code></em> : Hyperviosr in which VMs are going to run. These are Virtualbox, VMware and many more. <a href="https://docs.vagrantup.com/v2/providers/index.html">Read here</a></p>
+
+<p><em><code>Provising</code></em> : Tools like Puppet, Chef, Ansibal and ofcourse Shell script. <a href="https://docs.vagrantup.com/v2/provisioning/index.html">Read here</a></p>
+
+<p><code>Working environment is Ubuntu 12.04</code></p>
+
+<p>Install this packages</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get install dpkg-dev virtualbox linux-headers-generic linux-image-generic linux-generic vagrant
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Know the Virtualbox and Vagrant is installed, we will add <code>box</code> in vagrant.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box add precise32 http://files.vagrantup.com/precise32.box
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It will take some time, and depends on your bandwidth. After the download is completed, there will be a <code>Vagrantfile</code> in the working directory.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>ls -l
+</span><span class='line'>-rw-rw-r--  <span class="m">1</span> ajaiswal ajaiswal <span class="m">3876</span> Jul  <span class="m">1</span> 12:31 Vagrantfile
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Open the Vagrantfile and change this line to</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>config.vm.box <span class="o">=</span> <span class="s2">&quot;precise32&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can list the boxes, like this</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant box list
+</span><span class='line'>precise32
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we can start the box with this command.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant up
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Importing base box <span class="s1">&#39;precise32&#39;</span>...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> The guest additions on this VM <span class="k">do</span> not match the install version of
+</span><span class='line'>VirtualBox! This may cause things such as forwarded ports, shared
+</span><span class='line'>folders, and more to not work properly. If any of those things fail on
+</span><span class='line'>this machine, please update the guest additions and repackage the
+</span><span class='line'>box.
+</span><span class='line'>
+</span><span class='line'>Guest Additions Version: 4.2.0
+</span><span class='line'>VirtualBox Version: 4.1.12
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Matching MAC address <span class="k">for</span> NAT networking...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>forwarded ports...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Forwarding ports...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> -- <span class="nv">22</span> <span class="o">=</span>&gt; <span class="m">2222</span> <span class="o">(</span>adapter 1<span class="o">)</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Creating shared folders metadata...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>network interfaces...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Booting VM...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Waiting <span class="k">for</span> VM to boot. This can take a few minutes.
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> VM booted and ready <span class="k">for</span> use!
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Mounting shared folders...
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> -- v-root: /vagrant
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we will login into the box.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant ssh
+</span><span class='line'>Welcome to Ubuntu 12.04 LTS <span class="o">(</span>GNU/Linux 3.2.0-23-generic-pae i686<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'> * Documentation:  https://help.ubuntu.com/
+</span><span class='line'>Welcome to your Vagrant-built virtual machine.
+</span><span class='line'>Last login: Fri Sep <span class="m">14</span> 06:22:31 <span class="m">2012</span> from 10.0.2.2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Running some command under the box.</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant@precise32:~<span class="nv">$ </span>ll
+</span><span class='line'>total 48
+</span><span class='line'>drwxr-xr-x <span class="m">4</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ./
+</span><span class='line'>drwxr-xr-x <span class="m">3</span> root    root    <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ../
+</span><span class='line'>-rw------- <span class="m">1</span> vagrant vagrant  <span class="m">114</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_history
+</span><span class='line'>-rw-r--r-- <span class="m">1</span> vagrant vagrant  <span class="m">220</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_logout
+</span><span class='line'>-rw-r--r-- <span class="m">1</span> vagrant vagrant <span class="m">3486</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bashrc
+</span><span class='line'>drwx------ <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .cache/
+</span><span class='line'>-rwxr-xr-x <span class="m">1</span> vagrant vagrant <span class="m">6487</span> Sep <span class="m">14</span>  <span class="m">2012</span> postinstall.sh*
+</span><span class='line'>-rw-r--r-- <span class="m">1</span> vagrant vagrant  <span class="m">675</span> Sep <span class="m">14</span>  <span class="m">2012</span> .profile
+</span><span class='line'>drwx------ <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .ssh/
+</span><span class='line'>-rw-r--r-- <span class="m">1</span> vagrant vagrant    <span class="m">0</span> Sep <span class="m">14</span>  <span class="m">2012</span> .sudo_as_admin_successful
+</span><span class='line'>-rw------- <span class="m">1</span> vagrant vagrant    <span class="m">6</span> Sep <span class="m">14</span>  <span class="m">2012</span> .vbox_version
+</span><span class='line'>-rw------- <span class="m">1</span> vagrant vagrant   <span class="m">12</span> Sep <span class="m">14</span>  <span class="m">2012</span> .veewee_version
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Hope this clear your basic doubts, Feel free if there is any question.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Song Downloader]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader/"/>
+    <updated>2014-06-28T03:29:23+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader</id>
+    <content type="html"><![CDATA[<p>Since I&rsquo;m working on puppet DSL language from past year, so always wanted to take on <code>ruby</code>. Finally got the chances to do some task.
+I have had lost many of my songs library. So wanted to keep track of everything and needed to start from scratch. As I love Hindi/Bollywood
+songs, the only site comes to my mind is <code>songspk.name</code> and I had some trouble accessing it, due to Indian goverment blocking or either my ISP.</p>
+
+<p>To get out of this, I found a site <code>allmp3song.com</code>, which is truly simple and fast. The only problem was, I can&rsquo;t download the whole movie songs at a time.</p>
+
+<!-- more -->
+
+
+<p> You have to click on each songs and download it manually, which was very frustating. So thought of writing a script. I wrote one in bash which was quite simple by using <code>wget</code>. Then I took this as a self owned task in.</p>
+
+<p>Below is the script, which I wrote, please let me know if any improvement can be done. So far its working like charm..</p>
+
+<figure class='code'><figcaption><span>mp3song.rb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/ruby</span>
+</span><span class='line'><span class="c1"># Date : 18/04/2014</span>
+</span><span class='line'><span class="c1"># Author : Ashish Jaiswal</span>
+</span><span class='line'><span class="c1"># Email ID : ashish1099@gmail.com</span>
+</span><span class='line'><span class="c1"># Purpose : Learning some ruby basics.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;nokogiri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">filelist_id</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot; Sorry..... Please read this carefully</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">Please put album code. To find album code, go to any browser and search for required album.</span>
+</span><span class='line'><span class="s2">Example : </span>
+</span><span class='line'><span class="s2"> http://allmp3song.com/filelist/3330/arijit_singh_-_mtv_unplugged_season_3_%282013%29/new2old/1</span>
+</span><span class='line'><span class="s2">     </span>
+</span><span class='line'><span class="s2">So the album code is 3330&quot;</span>
+</span><span class='line'><span class="nb">exit</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="n">uri_str</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">,</span> <span class="n">limit</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># You should choose a better exception.</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s1">&#39;too many HTTP redirects&#39;</span> <span class="k">if</span> <span class="n">limit</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">encoded_url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">uri_str</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">encoded_url</span><span class="p">)</span>   
+</span><span class='line'>      <span class="n">req</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;User-Agent&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Ruby/</span><span class="si">#{</span><span class="no">RUBY_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">})</span>
+</span><span class='line'>      <span class="n">response</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">http</span><span class="o">|</span>
+</span><span class='line'>          <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">case</span> <span class="n">response</span>
+</span><span class='line'>      <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPSuccess</span> <span class="k">then</span>
+</span><span class='line'>          <span class="n">response</span>
+</span><span class='line'>      <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPRedirection</span> <span class="k">then</span>
+</span><span class='line'>          <span class="n">location</span> <span class="o">=</span> <span class="n">response</span><span class="o">[</span><span class="s1">&#39;location&#39;</span><span class="o">]</span>
+</span><span class='line'>          <span class="nb">puts</span> <span class="s2">&quot;Started downloading ====&gt; ===&gt; ==&gt; </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="k">begin</span>
+</span><span class='line'>              <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">songs_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">saved_file</span> <span class="o">|</span>
+</span><span class='line'>                              <span class="nb">open</span><span class="p">((</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">read_file</span> <span class="o">|</span>
+</span><span class='line'>                                  <span class="n">saved_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">read_file</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>                    
+</span><span class='line'>                                        <span class="k">end</span> <span class="c1"># End of read_file</span>
+</span><span class='line'>                              <span class="k">end</span> <span class="c1"># End of saved_file</span>
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;Saved as </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>   
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;==============================================================================================================&quot;</span>
+</span><span class='line'>          <span class="k">rescue</span> <span class="no">OpenURI</span><span class="o">::</span><span class="no">HTTPError</span>
+</span><span class='line'>              <span class="nb">puts</span> <span class="s2">&quot;Song is not present on the server.. Sorry :)</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>          <span class="n">response</span><span class="o">.</span><span class="n">value</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">BASE_MP3SONGS_URL</span> <span class="o">=</span> <span class="s2">&quot;http://allmp3song.com&quot;</span>
+</span><span class='line'><span class="no">FILELIST_URL</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/1&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Calling NOKOGIRI to parse HTML </span>
+</span><span class='line'><span class="n">songs_list</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="no">FILELIST_URL</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the album name</span>
+</span><span class='line'><span class="n">album_name</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div#mainDiv h2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\s: Mp3 Songs/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">album_path</span> <span class="o">=</span> <span class="s2">&quot;/home/songs/</span><span class="si">#{</span><span class="n">album_name</span><span class="si">}</span><span class="s2">/&quot;</span>
+</span><span class='line'><span class="no">Dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">album_path</span><span class="p">)</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">album_path</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the list of page of particular albums.</span>
+</span><span class='line'><span class="n">pagination</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.pgn&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_i</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Run a loop to get the songs_id and based on id get the songs_name</span>
+</span><span class='line'><span class="c1"># Example http://allmp3song.com/files/download/id/24398</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>  <span class="k">begin</span>    
+</span><span class='line'>      <span class="n">song_id</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName&quot;</span><span class="p">)</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="s2">&quot;href&quot;</span><span class="o">].</span><span class="n">match</span><span class="p">(</span><span class="sr">/\d{3,}/</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">between_url</span> <span class="o">=</span> <span class="s2">&quot;/files/download/id/&quot;</span>
+</span><span class='line'>      <span class="n">url_download</span> <span class="o">=</span> <span class="o">[</span> <span class="no">BASE_MP3SONGS_URL</span><span class="p">,</span> <span class="n">between_url</span><span class="p">,</span> <span class="n">song_id</span> <span class="o">].</span><span class="n">join</span>
+</span><span class='line'>      <span class="n">song_name</span> <span class="o">=</span> <span class="n">songs_list</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName div &gt; text()&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D$/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">songs_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">print</span> <span class="n">fetch</span><span class="p">(</span><span class="n">url_download</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">rescue</span> <span class="no">NoMethodError</span>
+</span><span class='line'>  <span class="k">end</span> <span class="c1"># End of BEGIN</span>
+</span><span class='line'><span class="k">end</span> <span class="c1"># End of DO</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Looking for Second page.</span>
+</span><span class='line'><span class="k">if</span> <span class="n">pagination</span> <span class="o">&gt;</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="no">FILELIST_URL02</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/2&quot;</span>
+</span><span class='line'>  <span class="n">songs_list02</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="no">FILELIST_URL02</span><span class="p">))</span>
+</span><span class='line'><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span>
+</span><span class='line'>  <span class="k">begin</span>    
+</span><span class='line'>      <span class="n">song_id</span> <span class="o">=</span> <span class="n">songs_list02</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName&quot;</span><span class="p">)</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="s2">&quot;href&quot;</span><span class="o">].</span><span class="n">match</span><span class="p">(</span><span class="sr">/\d{3,}/</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">between_url</span> <span class="o">=</span> <span class="s2">&quot;/files/download/id/&quot;</span>
+</span><span class='line'>      <span class="n">url_download</span> <span class="o">=</span> <span class="o">[</span> <span class="no">BASE_MP3SONGS_URL</span><span class="p">,</span> <span class="n">between_url</span><span class="p">,</span> <span class="n">song_id</span> <span class="o">].</span><span class="n">join</span>
+</span><span class='line'>      <span class="n">song_name</span> <span class="o">=</span> <span class="n">songs_list02</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s2">&quot;a.fileName div &gt; text()&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;| &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D$/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">songs_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">print</span> <span class="n">fetch</span><span class="p">(</span><span class="n">url_download</span><span class="p">,</span> <span class="n">songs_name</span><span class="p">,</span> <span class="n">song_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">rescue</span> <span class="no">NoMethodError</span>
+</span><span class='line'>      <span class="k">end</span> <span class="c1"># End of BEGIN</span>
+</span><span class='line'>  <span class="k">end</span> <span class="c1"># End of DO</span>
+</span><span class='line'><span class="k">end</span> <span class="c1"># End of IF</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Managing Daemons in Heterogeneous Linux Environment From Puppet]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet/"/>
+    <updated>2014-06-28T00:01:13+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet</id>
+    <content type="html"><![CDATA[<p>We have a lot of box mixed with heterogeneous linux environment. So managing a daemons is a bit struggling. So worte my own manifest to over come this. I don&rsquo;t know what other options there are, But this seems to kind of work for me.
+This can be scale upto <strong>N</strong> number of linux flavours, currently I have the manifest including only <code>CentOS, OpenSuSE, Ubuntu</code>.</p>
+
+<p>Let me know if you have any trouble with it or any improvement is always welcome.</p>
+
+<!-- more -->
+
+
+<figure class='code'><figcaption><span>services.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="k">class</span> <span class="na">services</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">define</span> <span class="na">daemons</span><span class="p">(</span>
+</span><span class='line'>          <span class="nv">$service_ensure,</span>
+</span><span class='line'>          <span class="nv">$service_enable,</span>
+</span><span class='line'>          <span class="nv">$service_require</span> <span class="o">=</span> <span class="k">false</span>
+</span><span class='line'>                <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nv">$daemon_provider</span> <span class="o">=</span> <span class="nv">$operatingsystem</span> <span class="o">?</span> <span class="p">{</span> <span class="s">&#39;OpenSuSE&#39;</span> <span class="o">=&gt;</span> <span class="s">&#39;systemd&#39;</span><span class="p">,</span> <span class="s">&#39;CentOS&#39;</span> <span class="o">=&gt;</span> <span class="s">&#39;redhat&#39;</span><span class="p">,</span> <span class="s">&#39;Ubuntu&#39;</span> <span class="o">=&gt;</span> <span class="s">&#39;upstart&#39;</span> <span class="p">}</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="k">if</span> <span class="nv">$service_require</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">Service</span> <span class="p">{</span> <span class="na">require</span> <span class="o">=&gt;</span> <span class="nv">$daemon_require</span> <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="k">service</span> <span class="p">{</span> <span class="s">&quot;$name&quot;</span> <span class="p">:</span>
+</span><span class='line'>                        <span class="na">ensure</span> <span class="o">=&gt;</span> <span class="nv">$service_ensure,</span>
+</span><span class='line'>                        <span class="na">enable</span> <span class="o">=&gt;</span> <span class="nv">$service_enable,</span>
+</span><span class='line'>                        <span class="na">provider</span> <span class="o">=&gt;</span> <span class="nv">$daemon_provider,</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}</span><span class="c"> #End of daemons</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">case</span> <span class="nv">$operatingsystem</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;OpenSuSE&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"></span>
+</span><span class='line'><span class="c">  # OpenSUSE</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;avahi-daemon&#39;</span> <span class="p">:</span>     <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;bluetooth.service&#39;</span> <span class="p">:</span> <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;atd&#39;</span> <span class="p">:</span>      <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;at&#39;]&quot;</span>  <span class="p">}</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;rpcbind&#39;</span> <span class="p">:</span>      <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;rpcbind&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span><span class="c"> #End of OpenSuSe</span>
+</span><span class='line'>  
+</span><span class='line'>      <span class="s">&quot;CentOS&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"></span>
+</span><span class='line'><span class="c">  # CentOS</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;auditd&#39;</span> <span class="p">:</span>       <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;mdmonitor&#39;</span> <span class="p">:</span>    <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;nscd&#39;</span> <span class="p">:</span>         <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;nscd&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ntpd&#39;</span> <span class="p">:</span>         <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;ntp&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span><span class="c"> #End of CentOS</span>
+</span><span class='line'>  
+</span><span class='line'>      <span class="s">&quot;Ubuntu&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"> </span>
+</span><span class='line'><span class="c">  # Ubuntu</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ypbind&#39;</span> <span class="p">:</span>       <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;nis&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ssh&#39;</span> <span class="p">:</span>      <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;openssh-server&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span><span class="c"> # End of Ubuntu</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}</span><span class="c"> #End of operatingsystem</span>
+</span><span class='line'><span class="p">}</span><span class="c"> #End of baseos::ervices</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can call this defination from any other module like this. I&rsquo;m calling from my vsftp module.</p>
+
+<figure class='code'><figcaption><span>vsftp.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="na">services</span><span class="p">::</span><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;vsftpd&#39;</span> <span class="p">:</span>  <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="s">&quot;Package[&#39;vsftpd&#39;]&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Collectd DRBD Plugin]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/27/collectd-drbd-plugin/"/>
+    <updated>2014-06-27T12:20:30+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/27/collectd-drbd-plugin</id>
+    <content type="html"><![CDATA[<p>I have ran into a scenario where my manager wanted to monitor drbd resource. So we are using graphite over here and pushing data from collectd to graphite.
+I did a quick search on <strong>google.com</strong>, but didn&rsquo;t find any collectd drbd plugin. Actually I found one which is in python, <a href="https://git.kumina.nl/packages/collectd-plugins-kumina/blob/master/drbd.py">This is the link</a></p>
+
+<p>Only problem which I remember, when I was testing this, it looks for only one resource. Since I haven&rsquo;t learned python.
+I thought of writing my own. I wrote a bash script and got the job done.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>drbd.sh </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'><span class="c"># Example</span>
+</span><span class='line'><span class="c"># ns:0 nr:1950024 dw:1950024 dr:0 al:0 bm:143 lo:0 pe:0 ua:0 ap:0 ep:1 wo:d oos:0</span>
+</span><span class='line'><span class="c"># Author: Ashish Jaiswal</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">HOSTNAME</span><span class="o">=</span><span class="k">$(</span>hostname<span class="k">)</span>
+</span><span class='line'><span class="nv">INTERVAL</span><span class="o">=</span>1
+</span><span class='line'>
+</span><span class='line'><span class="k">while</span> sleep <span class="s2">&quot;$INTERVAL&quot;</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>        <span class="c"># How many resource are running out there.</span>
+</span><span class='line'>        <span class="nv">resource_count</span><span class="o">=</span><span class="k">$(</span>drbd-overview  <span class="p">|</span> wc -l<span class="k">)</span>
+</span><span class='line'>        <span class="k">for</span> i in <span class="k">$(</span>seq <span class="m">1</span> <span class="nv">$resource_count</span><span class="k">)</span>
+</span><span class='line'>        <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c"># Gives the list of the resource name</span>
+</span><span class='line'>                <span class="nv">name</span><span class="o">=</span><span class="k">$(</span>drbd-overview <span class="p">|</span> awk <span class="s2">&quot;NR==$i&quot;</span> <span class="p">|</span> awk -F <span class="s2">&quot;:&quot;</span> <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f 1<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nv">ns</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $1}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">nr</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">dw</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $3}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">dr</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $4}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">al</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $5}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">bm</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $6}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">lo</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $7}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">pe</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $8}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">ua</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $9}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">ap</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $10}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">ep</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $11}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>                <span class="nv">oss</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $13}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/network_send interval=$INTERVAL N:$ns&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/network_receive interval=$INTERVAL N:$nr&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/disk_write interval=$INTERVAL N:$dw&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/disk_read interval=$INTERVAL N:$dr&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/activity_log interval=$INTERVAL N:$al&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/bit_map interval=$INTERVAL N:$bm&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/local_count interval=$INTERVAL N:$lo&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/pending interval=$INTERVAL N:$pe&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/unacknowledged interval=$INTERVAL N:$ua&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/application_pending interval=$INTERVAL N:$ap&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/epochs interval=$INTERVAL N:$ep&quot;</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/out_of_sync interval=$INTERVAL N:$oss&quot;</span>
+</span><span class='line'>        <span class="k">done</span> <span class="c"># End of name</span>
+</span><span class='line'><span class="k">done</span> <span class="c"># End of while</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Create a file under <code>/etc/collect.d/drbd</code> and enter this</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LoadPlugin exec
+</span><span class='line'>&lt;Plugin exec>
+</span><span class='line'>Exec "nobody" "/usr/lib64/collectd/python-plugins/drbd.sh"
+</span><span class='line'>NotificationExec "nobody" "/usr/lib64/collectd/python-plugins/drbd.sh"
+</span><span class='line'>&lt;/Plugin></span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Setup Octopress With GitHub]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/25/setup-octopress-with-github/"/>
+    <updated>2014-06-25T15:36:00+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/25/setup-octopress-with-github</id>
+    <content type="html"><![CDATA[<p>This post will guide you how to setup the Octopress blog and host it with Github.
+Why did I choosed Octopress for my blogging, I guess it was simple and better integration with github, and I didn&rsquo;t wanted to spend any extra bucks for this.
+I&rsquo;m currently setting this up in Elementary OS backed by ubuntu 12.04.</p>
+
+<p>Check whether your ruby version is 1.9.3 or more then this</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install ruby1.9.1-full</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Clone the Octopress to your working directory.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git://github.com/imathis/octopress.git octopress</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>Run this command and the Octopress is good to go.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd octopress/
+</span><span class='line'>sudo gem install bundler
+</span><span class='line'>bundle install
+</span><span class='line'>rake install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Just to check whether every thing is working or not.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rake preview</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Check in your local browser, whether you can view page or not.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://localhost:4000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you can see the Octopress sample page. that means you are good to go. Next we can setup it with Github.
+It will ask your repository link, in my case it is <code>git@github.com:ashish1099/ashish.github.io.git</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rake setup_github_pages
+</span><span class='line'>rake generate
+</span><span class='line'>rake deploy</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next we need to commit the source branch into GitHub.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git add .
+</span><span class='line'>git commit -m 'your message'
+</span><span class='line'>git push origin source</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If anything failed, check this commands.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git remote -v
+</span><span class='line'>octopress      git@github.com:imathis/octopress.git (fetch)
+</span><span class='line'>octopress      git@github.com:imathis/octopress.git (push)
+</span><span class='line'>origin    git@github.com:ashish1099/ashish.github.io.git (fetch)
+</span><span class='line'>origin    git@github.com:ashish1099/ashish.github.io.git (push)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If the above command is not returning your git repository, then probably you will have to add this.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git remote add origin git@github.com:ashish1099/ashish.github.io.git</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Check what is the branch, it should be <code>source</code> branch.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git branch
+</span><span class='line'>* master</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If it is not <code>source</code> branch, then change it to <code>source</code> branch by this command.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git branch -m master source
+</span><span class='line'>git branch
+</span><span class='line'>* source</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[About Me]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/25/about-me/"/>
+    <updated>2014-06-25T14:06:00+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/25/about-me</id>
+    <content type="html"><![CDATA[<p>Hello,</p>
+
+<p>This is Ashish Jaiswal, the owner of this blog. I&rsquo;m a Linux System Administrator. Just loving this whole &ldquo;<strong>Octopress + Github</strong>&rdquo;. This is my first blog, I hope I can give something back to community.</p>
+
+<p>Just a basic intro about myself.</p>
+
+<p>I have been working as a Linux Administrator from few past years. I&rsquo;m currently focussing on configuration management and cloud computing, currently working at CMIE Pvt LTD.
+you can contact me <code>ashish1099@gmail.com</code></p>
+]]></content>
+  </entry>
   
 </feed>

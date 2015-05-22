@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Octopress | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Setup Octopress With GitHub]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/25/setup-octopress-with-github/"/>
+    <updated>2014-06-25T15:36:00+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/25/setup-octopress-with-github</id>
+    <content type="html"><![CDATA[<p>This post will guide you how to setup the Octopress blog and host it with Github.
+Why did I choosed Octopress for my blogging, I guess it was simple and better integration with github, and I didn&rsquo;t wanted to spend any extra bucks for this.
+I&rsquo;m currently setting this up in Elementary OS backed by ubuntu 12.04.</p>
+
+<p>Check whether your ruby version is 1.9.3 or more then this
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install ruby1.9.1-full</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Clone the Octopress to your working directory.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git://github.com/imathis/octopress.git octopress</span></code></pre></td></tr></table></div></figure></p>
+
+<!-- more -->
+
+
+<p>Run this command and the Octopress is good to go.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd octopress/
+</span><span class='line'>sudo gem install bundler
+</span><span class='line'>bundle install
+</span><span class='line'>rake install</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Just to check whether every thing is working or not.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rake preview</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Check in your local browser, whether you can view page or not.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;a href="http://localhost:4000">http://localhost:4000&lt;/a></span></code></pre></td></tr></table></div></figure></p>
+
+<p>If you can see the Octopress sample page. that means you are good to go. Next we can setup it with Github.
+It will ask your repository link, in my case it is <code>git@github.com:ashish1099/ashish.github.io.git</code>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rake setup_github_pages
+</span><span class='line'>rake generate
+</span><span class='line'>rake deploy</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Next we need to commit the source branch into GitHub.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git add .
+</span><span class='line'>git commit -m &lsquo;your message&rsquo;
+</span><span class='line'>git push origin source</span></code></pre></td></tr></table></div></figure></p>
+
+<p>If anything failed, check this commands.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git remote -v
+</span><span class='line'>octopress      git@github.com:imathis/octopress.git (fetch)
+</span><span class='line'>octopress      git@github.com:imathis/octopress.git (push)
+</span><span class='line'>origin  git@github.com:ashish1099/ashish.github.io.git (fetch)
+</span><span class='line'>origin  git@github.com:ashish1099/ashish.github.io.git (push)</span></code></pre></td></tr></table></div></figure></p>
+
+<p>If the above command is not returning your git repository, then probably you will have to add this.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git remote add origin git@github.com:ashish1099/ashish.github.io.git</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Check what is the branch, it should be <code>source</code> branch.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git branch
+</span><span class='line'>* master</span></code></pre></td></tr></table></div></figure></p>
+
+<p>If it is not <code>source</code> branch, then change it to <code>source</code> branch by this command.
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git branch -m master source
+</span><span class='line'>git branch
+</span><span class='line'>* source</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

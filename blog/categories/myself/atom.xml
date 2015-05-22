@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Myself | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/myself/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[About Me]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/25/about-me/"/>
+    <updated>2014-06-25T14:06:00+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/25/about-me</id>
+    <content type="html"><![CDATA[<p>Hello,</p>
+
+<p>This is Ashish Jaiswal, the owner of this blog. I&rsquo;m a Linux System Administrator. Just loving this whole &ldquo;<strong>Octopress + Github</strong>&rdquo;. This is my first blog, I hope I can give something back to community.</p>
+
+<p>Just a basic intro about myself.</p>
+
+<p>I have been working as a Linux Administrator from few past years. I&rsquo;m currently focussing on configuration management and cloud computing, currently working at CMIE Pvt LTD.
+you can contact me <code>ashish1099@gmail.com</code></p>
+]]></content>
+  </entry>
+  
+</feed>

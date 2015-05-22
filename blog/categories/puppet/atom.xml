@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Puppet | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/puppet/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[My First Puppet Types and Providers]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/11/13/my-first-puppet-types-and-providers/"/>
+    <updated>2014-11-13T16:34:57+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/11/13/my-first-puppet-types-and-providers</id>
+    <content type="html"><![CDATA[<p>This is first time I wrote the type and provider for a simple installation of the perl libraries
+directly from cpan.</p>
+
+<!-- more -->
+
+
+<p>This is tree structure of the cpan module.
+<figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="na">puppetmaster</span><span class="p">:</span><span class="o">/</span><span class="na">etc</span><span class="o">/</span><span class="na">puppet</span><span class="o">/</span><span class="na">master</span><span class="o">/</span><span class="na">modules</span><span class="o">/</span><span class="na">cpan</span><span class="c"> # tree</span>
+</span><span class='line'><span class="err">.</span>
+</span><span class='line'><span class="err">├──</span> <span class="na">lib</span>
+</span><span class='line'><span class="err">│  </span> <span class="err">└──</span> <span class="na">puppet</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">├──</span> <span class="na">provider</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">│  </span> <span class="err">└──</span> <span class="na">cpan</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">│  </span>     <span class="err">└──</span> <span class="na">cpan</span><span class="err">.</span><span class="na">rb</span>
+</span><span class='line'><span class="err">│  </span>     <span class="err">└──</span> <span class="na">type</span>
+</span><span class='line'><span class="err">│  </span>         <span class="err">└──</span> <span class="na">cpan</span><span class="err">.</span><span class="na">rb</span>
+</span><span class='line'><span class="err">└──</span> <span class="na">manifests</span>
+</span><span class='line'>    <span class="err">└──</span> <span class="na">init</span><span class="err">.</span><span class="na">pp</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="mi">6</span> <span class="na">directories</span><span class="p">,</span> <span class="mi">3</span> <span class="na">files</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;lib/</span><span class="n">puppet</span><span class="o">/</span><span class="n">provider</span><span class="o">/</span><span class="n">cpan</span><span class="o">/</span><span class="n">cpan</span><span class="o">.</span><span class="n">rb</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;require &amp;lsquo;puppet/</span><span class="n">provider</span><span class="o">/</span><span class="n">package</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;Puppet::Type.type(:cpan).provide(:cpan, :parent =&gt; Puppet::Provider::Package ) do</span>
+</span><span class='line'><span class="sr">    desc &amp;ldquo;Installation of perl modules from cpan&amp;rdquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">commands</span> <span class="ss">:cpanm</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="s2">&quot;/usr/bin/cpanm&quot;</span> <span class="k">if</span> <span class="no">Puppet</span><span class="o">::</span><span class="no">FileSystem</span><span class="o">.</span><span class="n">exist?</span> <span class="s1">&#39;/usr/bin/cpanm&#39;</span>
+</span><span class='line'><span class="n">commands</span> <span class="ss">:perldoc</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="s2">&quot;perldoc&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># TODO add cpan as different way of installation.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">cpanm</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>    <span class="n">cpanm</span><span class="p">(</span><span class="s1">&#39;-U&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">exists?</span>
+</span><span class='line'>    <span class="k">begin</span>
+</span><span class='line'>        <span class="n">perldoc</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="n">resource</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>        <span class="kp">true</span>
+</span><span class='line'>    <span class="k">rescue</span> <span class="no">Puppet</span><span class="o">::</span><span class="no">ExecutionFailure</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">e</span>
+</span><span class='line'>        <span class="kp">false</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>cpan.rb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;lib/</span><span class="n">puppet</span><span class="o">/</span><span class="n">type</span><span class="o">/</span><span class="n">cpan</span><span class="o">.</span><span class="n">rb</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;Puppet::Type.newtype(:cpan) do&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="vi">@doc</span> <span class="o">=</span> <span class="s2">&quot;Manage the installation and uninstallation of perl libraries from cpan repository using cpanminus manager,</span>
+</span><span class='line'><span class="s2">    you can pass your own local cpan repository. </span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    Valid options :- </span>
+</span><span class='line'><span class="s2">    1. &#39;ensure&#39; =&amp;gt; present||absent      # Present is the default options, absent will uninstall the perl libraries.</span>
+</span><span class='line'><span class="s2">    2. &#39;version&#39; =&amp;gt; latest          # Latest version of perl libraries will get installed, if you want you can pass the version number.</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    Example: </span>
+</span><span class='line'><span class="s2">        cpan { &#39;Text::ASCIITable&#39; : ensure =&amp;gt; present }</span>
+</span><span class='line'><span class="s2">        cpan { &#39;Text::ASCIITable&#39; : ensure =&amp;gt; present, version =&amp;gt; &#39;1.0.1&#39;} &quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ensurable</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">defaultvalues</span>
+</span><span class='line'>    <span class="n">defaultto</span> <span class="ss">:present</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">newparam</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:namevar</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="kp">true</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">desc</span> <span class="s2">&quot;Name of the Perl library&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">newproperty</span><span class="p">(</span><span class="ss">:version</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">desc</span> <span class="s2">&quot;Specify version number&quot;</span>
+</span><span class='line'>    <span class="n">validate</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+</span><span class='line'>        <span class="nb">fail</span><span class="p">(</span><span class="s2">&quot;Invalid version </span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">unless</span> <span class="n">value</span> <span class="o">=~</span> <span class="sr">/^[0-9A-Za-z\.:-]+$/</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Automate Installation of Perl Modules Using Cpanminus Manager]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/"/>
+    <updated>2014-11-11T21:31:46+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus</id>
+    <content type="html"><![CDATA[<p>This manifest will help you to install perl libraries directly from cpan, You can set you cpan local repository or you can use any cpan mirror out there.
+All I did is created a defination to install the perl libraries from cpan repository.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">h1</span><span class="o">&gt;</span><span class="na">Install</span> <span class="na">perl</span> <span class="na">modules</span> <span class="na">from</span> <span class="na">cpan</span><span class="o">&lt;/</span><span class="na">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="na">cpan</span> <span class="p">{</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">pre</span><span class="o">&gt;&lt;</span><span class="na">code</span><span class="o">&gt;</span><span class="k">package</span> <span class="p">{</span> <span class="p">[</span> <span class="s">&#39;perl-YAML-Perl&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Error&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-DistnameInfo&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-Meta-Check&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;perl-File-pushd&#39;</span><span class="p">,</span> <span class="s">&#39;perl-local-lib&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Module-CPANfile&#39;</span><span class="p">,</span> <span class="s">&#39;perl-App-cpanminus&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;perl-aliased&#39;</span><span class="p">,</span> <span class="s">&#39;make&#39;</span> <span class="p">]</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">define</span> <span class="na">perl</span> <span class="p">(</span> <span class="nv">$cpan_repo</span> <span class="o">=</span> <span class="s">&quot;http://mirror.teklinks.com/CPAN/&quot;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">exec</span> <span class="p">{</span> <span class="s">&quot;$name&quot;</span> <span class="p">:</span>
+</span><span class='line'>        <span class="na">command</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;cpanm --mirror $cpan_repo --mirror-only $name&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="na">require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;make&quot;</span><span class="p">,</span> <span class="s">&quot;perl-App-cpanminus&quot;</span> <span class="p">],</span>
+</span><span class='line'>        <span class="na">unless</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;perldoc -l $name&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of cpan_perl</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="na">code</span><span class="o">&gt;&lt;/</span><span class="na">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="p">}</span><span class="c"> #End of perl</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can add like this in your example.pp</p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="na">cpan</span><span class="p">::</span><span class="na">perl</span> <span class="p">{</span> <span class="err">&amp;</span><span class="na">ldquo</span><span class="p">;</span><span class="na">Text</span><span class="p">::</span><span class="na">ASCIITable</span><span class="err">&amp;</span><span class="na">rdquo</span><span class="p">;</span> <span class="p">:</span>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bind DNS With Puppet on Opensuse]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse/"/>
+    <updated>2014-07-23T10:52:05+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse</id>
+    <content type="html"><![CDATA[<p>This blog is about setting up a DNS server with puppet module. I have written a manifesto to get the job done.
+You can add more if you like.</p>
+
+<p><code>Requirements</code></p>
+
+<ol>
+<li>OpenSuse OS.</li>
+<li>Puppet Server</li>
+</ol>
+
+
+<p>You can install bind manually like this and then configure it. But if you have multiple DNS server, then puppet can be handy.
+Currently my manifest only manage configuration file. Will add support to manage the zone files too.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>root@ashish1099:~<span class="o">]</span> zypper install <span class="nb">bind</span>
+</span><span class='line'>Loading repository data<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Reading installed packages<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Resolving package dependencies<span class="p">&amp;</span>hellip<span class="p">;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;The following <span class="m">2</span> NEW packages are going to be installed:
+</span><span class='line'>  <span class="nb">bind bind</span>-chrootenv&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;2 new packages to install.
+</span><span class='line'>Overall download size: 316.3 KiB. After the operation, additional 717.7 KiB will be used.
+</span><span class='line'>Continue? <span class="o">[</span>y/n/? shows all options<span class="o">]</span> <span class="o">(</span>y<span class="o">)</span>: y
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64                                                                                                                                                   <span class="o">(</span><span class="p">&amp;</span>frac12<span class="p">;</span><span class="o">)</span>,  33.4 KiB <span class="o">(</span>  1.6 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64.rpm <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span><span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64                                                                                                                                                             <span class="o">(</span>2/2<span class="o">)</span>, 282.9 KiB <span class="o">(</span>716.1 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64.rpm <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span>.<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'><span class="o">(</span><span class="p">&amp;</span>frac12<span class="p">;</span><span class="o">)</span> Installing: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1 <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span>..<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Updating /etc/sysconfig/syslog<span class="p">&amp;</span>hellip<span class="p">;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;<span class="o">(</span>2/2<span class="o">)</span> Installing: <span class="nb">bind</span>-9.9.4P2-2.8.1 <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span><span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>wrote key file <span class="p">&amp;</span>ldquo<span class="p">;</span>/etc/rndc.key<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">h1</span><span class="o">&gt;</span><span class="na">Server</span><span class="p">::</span><span class="na">dns</span><span class="o">&lt;/</span><span class="na">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="na">server</span><span class="p">::</span><span class="na">dns</span> <span class="p">{</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">pre</span><span class="o">&gt;&lt;</span><span class="na">code</span><span class="o">&gt;</span>    <span class="k">package</span> <span class="p">{</span> <span class="s">&quot;bind&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">service</span> <span class="p">{</span> <span class="s">&quot;named.service&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">define</span> <span class="na">conf</span> <span class="p">(</span>
+</span><span class='line'>                    <span class="nv">$directory</span>              <span class="o">=</span> <span class="s">&quot;/var/lib/named&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$managed_keys_directory</span> <span class="o">=</span> <span class="s">&quot;/var/lib/named/dyn/&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$dump_file</span>              <span class="o">=</span> <span class="s">&quot;/var/log/named_dump.db&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$statistics_file</span>        <span class="o">=</span> <span class="s">&quot;/var/log/named.stats&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$forwarders</span>             <span class="o">=</span> <span class="p">[],</span>
+</span><span class='line'>                    <span class="nv">$forward</span>                <span class="o">=</span> <span class="s">&quot;only&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$listen_on_v6</span>           <span class="o">=</span> <span class="s">&quot;none&quot;</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">File</span> <span class="p">{</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span><span class="p">,</span> <span class="na">require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;bind&quot;</span><span class="p">],</span> <span class="k">notify</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Service</span><span class="p">[</span><span class="s">&quot;named.service&quot;</span><span class="p">]</span> <span class="p">}</span><span class="c"></span>
+</span><span class='line'>
+</span><span class='line'><span class="c">    # Configuration files</span>
+</span><span class='line'>    <span class="k">file</span> <span class="p">{</span> <span class="nv">$name</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span><span class="p">,</span> <span class="na">content</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">template</span><span class="p">(</span><span class="s">&quot;server/dns/named_conf.erb&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">file</span> <span class="p">{</span> <span class="s">&quot;/etc/named.d/rndc-access.conf&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of server::dns::conf defination</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">    # Root Zone</span>
+</span><span class='line'>    <span class="na">conf</span> <span class="p">{</span> <span class="s">&#39;/etc/named.conf&#39;</span> <span class="p">:</span>
+</span><span class='line'>                    <span class="na">forwarders</span>      <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;192.168.1.2&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="na">zones</span>           <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&#39;.&#39;</span>                     <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type hint&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;root.hint&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                    # Forward Zone</span>
+</span><span class='line'>                    <span class="s">&#39;localhost&#39;</span>             <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;localhost.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                    <span class="s">&#39;example.com&#39;</span>           <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/example.com&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                    # Reverse Zone</span>
+</span><span class='line'>                    <span class="s">&#39;0.0.127.in-addr.arpa&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;127.0.0.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                    <span class="s">&#39;1.168.192.in-addr.arpa&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/192.168.1.rev&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                     <span class="p">}</span><span class="c"> # End of Zones</span>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of conf </span>
+</span><span class='line'><span class="o">&lt;/</span><span class="na">code</span><span class="o">&gt;&lt;/</span><span class="na">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="p">}</span><span class="c"> # End of DNS</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>named_conf.erb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;h1&gt;Generated by Puppet&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;options {&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;pre&gt;&lt;code&gt;directory &quot;&amp;lt;%=@directory%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">managed-keys-directory &quot;&amp;lt;%=@managed_keys_directory%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">dump-file &quot;&amp;lt;%=@dump_file%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">statistics-file &quot;&amp;lt;%=@statistics_file%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">forwarders { &amp;lt;%=@forwarders%&amp;gt;; };</span>
+</span><span class='line'><span class="x">forward &amp;lt;%=@forward%&amp;gt;;</span>
+</span><span class='line'><span class="x">listen-on-v6 { &amp;lt;%=@listen_on_v6%&amp;gt;; };</span>
+</span><span class='line'><span class="x">notify no;</span>
+</span><span class='line'><span class="x">disable-empty-zone &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA&quot;;</span>
+</span><span class='line'><span class="x">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;};&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;&amp;lt;% if !@zones.empty? </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">/&lt;em&gt; Global zones &lt;/em&gt;/</span>
+</span><span class='line'><span class="x">&amp;lt;% @zones.sort_by {|key, value| key}.each do |key,value| </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">zone &amp;ldquo;&amp;lt;%= key </span><span class="err">%&gt;</span><span class="x">&amp;rdquo; in {</span>
+</span><span class='line'><span class="x">&amp;lt;% value.each do |line| </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &amp;lt;%= line </span><span class="err">%&gt;</span><span class="x">;</span>
+</span><span class='line'><span class="x">&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">};&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How to Setup Vagrant]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant/"/>
+    <updated>2014-07-01T12:38:48+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant</id>
+    <content type="html"><![CDATA[<p>What is Vagrant ?</p>
+
+<p>The big question, which I was thinking, when I first heard of it. So today finally got a chance to do some hands on.
+Basically it is a tools which gives you running VM, whenever you need it with all your environment set in place.
+So what was that huh? Consider that you are creating a VM or clonning a VM and starting it up and running some script to get
+the environment set in place. So why not automate this whole thing by vagrant.</p>
+
+<p>Vagrant allows you to launch VMs with provisioning on top of it.</p>
+
+<!-- more -->
+
+
+<p><img src="https://raw.githubusercontent.com/ashish1099/ashish1099.github.io/master/images/blog_images/logo_vagrant.png" alt="Image" /></p>
+
+<p><strong>Some Nomenclature</strong></p>
+
+<p><em><code>box</code></em> : Base image of an OS, <a href="https://docs.vagrantup.com/v2/boxes.html">Read here</a></p>
+
+<p><em><code>Provider</code></em> : Hyperviosr in which VMs are going to run. These are Virtualbox, VMware and many more. <a href="https://docs.vagrantup.com/v2/providers/index.html">Read here</a></p>
+
+<p><em><code>Provising</code></em> : Tools like Puppet, Chef, Ansibal and ofcourse Shell script. <a href="https://docs.vagrantup.com/v2/provisioning/index.html">Read here</a></p>
+
+<p><code>Working environment is Ubuntu 12.04</code></p>
+
+<p>Install this packages
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get install dpkg-dev virtualbox linux-headers-generic linux-image-generic linux-generic vagrant
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Know the Virtualbox and Vagrant is installed, we will add <code>box</code> in vagrant.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box add precise32 &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://files.vagrantup.com/precise32.box&quot;</span>&gt;http://files.vagrantup.com/precise32.box&lt;/a&gt;
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>It will take some time, and depends on your bandwidth. After the download is completed, there will be a <code>Vagrantfile</code> in the working directory.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>ls -l
+</span><span class='line'>-rw-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>  <span class="m">1</span> ajaiswal ajaiswal <span class="m">3876</span> Jul  <span class="m">1</span> 12:31 Vagrantfile
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Open the Vagrantfile and change this line to
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>config.vm.box <span class="o">=</span> <span class="p">&amp;</span>ldquo<span class="p">;</span>precise32<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can list the boxes, like this
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant box list
+</span><span class='line'>precise32
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Now we can start the box with this command.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant up
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Importing base box <span class="p">&amp;</span>lsquo<span class="p">;</span>precise32<span class="p">&amp;</span>rsquo<span class="p">;&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> The guest additions on this VM <span class="k">do</span> not match the install version of
+</span><span class='line'>VirtualBox! This may cause things such as forwarded ports, shared
+</span><span class='line'>folders, and more to not work properly. If any of those things fail on
+</span><span class='line'>this machine, please update the guest additions and repackage the
+</span><span class='line'>box.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Guest Additions Version: 4.2.0
+</span><span class='line'>VirtualBox Version: 4.1.12
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Matching MAC address <span class="k">for</span> NAT networking<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>forwarded ports<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Forwarding ports<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> <span class="p">&amp;</span>ndash<span class="p">;</span> <span class="nv">22</span> <span class="o">=</span>&gt; <span class="m">2222</span> <span class="o">(</span>adapter 1<span class="o">)</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Creating shared folders metadata<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>network interfaces<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Booting VM<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Waiting <span class="k">for</span> VM to boot. This can take a few minutes.
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> VM booted and ready <span class="k">for</span> use!
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Mounting shared folders<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> <span class="p">&amp;</span>ndash<span class="p">;</span> v-root: /vagrant
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Then we will login into the box.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant ssh
+</span><span class='line'>Welcome to Ubuntu 12.04 LTS <span class="o">(</span>GNU/Linux 3.2.0-23-generic-pae i686<span class="o">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;ul&gt;
+</span><span class='line'>&lt;li&gt;Documentation:  &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://help.ubuntu.com/&quot;</span>&gt;https://help.ubuntu.com/&lt;/a&gt;
+</span><span class='line'>Welcome to your Vagrant-built virtual machine.
+</span><span class='line'>Last login: Fri Sep <span class="m">14</span> 06:22:31 <span class="m">2012</span> from 10.0.2.2
+</span></code></pre></td></tr></table></div></figure></li>
+</ul>
+
+
+<p>Running some command under the box.</p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant@precise32:~<span class="nv">$ </span>ll
+</span><span class='line'>total 48
+</span><span class='line'>drwxr-xr-x <span class="m">4</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ./
+</span><span class='line'>drwxr-xr-x <span class="m">3</span> root    root    <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ../
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant  <span class="m">114</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_history
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant  <span class="m">220</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_logout
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant <span class="m">3486</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bashrc
+</span><span class='line'>drwx<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span> <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .cache/
+</span><span class='line'>-rwxr-xr-x <span class="m">1</span> vagrant vagrant <span class="m">6487</span> Sep <span class="m">14</span>  <span class="m">2012</span> postinstall.sh*
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant  <span class="m">675</span> Sep <span class="m">14</span>  <span class="m">2012</span> .profile
+</span><span class='line'>drwx<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span> <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .ssh/
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant    <span class="m">0</span> Sep <span class="m">14</span>  <span class="m">2012</span> .sudo_as_admin_successful
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant    <span class="m">6</span> Sep <span class="m">14</span>  <span class="m">2012</span> .vbox_version
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant   <span class="m">12</span> Sep <span class="m">14</span>  <span class="m">2012</span> .veewee_version
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Hope this clear your basic doubts, Feel free if there is any question.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Managing Daemons in Heterogeneous Linux Environment From Puppet]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet/"/>
+    <updated>2014-06-28T00:01:13+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet</id>
+    <content type="html"><![CDATA[<p>We have a lot of box mixed with heterogeneous linux environment. So managing a daemons is a bit struggling. So worte my own manifest to over come this. I don&rsquo;t know what other options there are, But this seems to kind of work for me.
+This can be scale upto <strong>N</strong> number of linux flavours, currently I have the manifest including only <code>CentOS, OpenSuSE, Ubuntu</code>.</p>
+
+<p>Let me know if you have any trouble with it or any improvement is always welcome.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>services.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="k">class</span> <span class="na">services</span> <span class="p">{</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">pre</span><span class="o">&gt;&lt;</span><span class="na">code</span><span class="o">&gt;</span>    <span class="k">define</span> <span class="na">daemons</span><span class="p">(</span>
+</span><span class='line'>        <span class="nv">$service_ensure,</span>
+</span><span class='line'>        <span class="nv">$service_enable,</span>
+</span><span class='line'>        <span class="nv">$service_require</span> <span class="o">=</span> <span class="k">false</span>
+</span><span class='line'>            <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$daemon_provider</span> <span class="o">=</span> <span class="nv">$operatingsystem</span> <span class="o">?</span> <span class="p">{</span> <span class="s">&#39;OpenSuSE&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&#39;systemd&#39;</span><span class="p">,</span> <span class="s">&#39;CentOS&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&#39;redhat&#39;</span><span class="p">,</span> <span class="s">&#39;Ubuntu&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&#39;upstart&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="nv">$service_require</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">Service</span> <span class="p">{</span> <span class="na">require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="nv">$daemon_require</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">service</span> <span class="p">{</span> <span class="s">&quot;$name&quot;</span> <span class="p">:</span>
+</span><span class='line'>                    <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="nv">$service_ensure,</span>
+</span><span class='line'>                    <span class="na">enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="nv">$service_enable,</span>
+</span><span class='line'>                    <span class="na">provider</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="nv">$daemon_provider,</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span><span class="c"> #End of daemons</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="nv">$operatingsystem</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;OpenSuSE&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"></span>
+</span><span class='line'><span class="c"># OpenSUSE</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;avahi-daemon&#39;</span> <span class="p">:</span>  <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;bluetooth.service&#39;</span> <span class="p">:</span> <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;atd&#39;</span> <span class="p">:</span>       <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;at&#39;]&quot;</span>  <span class="p">}</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;rpcbind&#39;</span> <span class="p">:</span>       <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;rpcbind&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span><span class="c"> #End of OpenSuSe</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="s">&quot;CentOS&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"></span>
+</span><span class='line'><span class="c"># CentOS</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;auditd&#39;</span> <span class="p">:</span>        <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;mdmonitor&#39;</span> <span class="p">:</span>     <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">stopped</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;nscd&#39;</span> <span class="p">:</span>      <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;nscd&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ntpd&#39;</span> <span class="p">:</span>      <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;ntp&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span><span class="c"> #End of CentOS</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="s">&quot;Ubuntu&quot;</span> <span class="p">:</span> <span class="p">{</span><span class="c"> </span>
+</span><span class='line'><span class="c"># Ubuntu</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ypbind&#39;</span> <span class="p">:</span>        <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;nis&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="na">daemons</span> <span class="p">{</span> <span class="s">&#39;ssh&#39;</span> <span class="p">:</span>       <span class="na">service_ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;Package[&#39;openssh-server&#39;]&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span><span class="c"> # End of Ubuntu</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span><span class="c"> #End of operatingsystem</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="na">code</span><span class="o">&gt;&lt;/</span><span class="na">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="p">}</span><span class="c"> #End of baseos::ervices</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can call this defination from any other module like this. I&rsquo;m calling from my vsftp module.</p>
+
+<p><figure class='code'><figcaption><span>vsftp.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="na">services</span><span class="p">::</span><span class="na">daemons</span> <span class="p">{</span> <span class="err">&amp;</span><span class="na">lsquo</span><span class="p">;</span><span class="na">vsftpd</span><span class="err">&amp;</span><span class="na">rsquo</span><span class="p">;</span> <span class="p">:</span>  <span class="na">service_ensure</span> <span class="o">=&gt;</span> <span class="k">running</span><span class="p">,</span> <span class="na">service_enable</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span> <span class="na">service_require</span> <span class="o">=&gt;</span> <span class="err">&amp;</span><span class="na">ldquo</span><span class="p">;</span><span class="k">Package</span><span class="p">[</span><span class="err">&amp;</span><span class="na">lsquo</span><span class="p">;</span><span class="na">vsftpd</span><span class="err">&amp;</span><span class="na">rsquo</span><span class="p">;]</span><span class="err">&amp;</span><span class="na">rdquo</span><span class="p">;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

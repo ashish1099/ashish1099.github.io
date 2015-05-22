@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Dns | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/dns/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Bind DNS With Puppet on Opensuse]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse/"/>
+    <updated>2014-07-23T10:52:05+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/23/bind-dns-on-opensuse</id>
+    <content type="html"><![CDATA[<p>This blog is about setting up a DNS server with puppet module. I have written a manifesto to get the job done.
+You can add more if you like.</p>
+
+<p><code>Requirements</code></p>
+
+<ol>
+<li>OpenSuse OS.</li>
+<li>Puppet Server</li>
+</ol>
+
+
+<p>You can install bind manually like this and then configure it. But if you have multiple DNS server, then puppet can be handy.
+Currently my manifest only manage configuration file. Will add support to manage the zone files too.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>root@ashish1099:~<span class="o">]</span> zypper install <span class="nb">bind</span>
+</span><span class='line'>Loading repository data<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Reading installed packages<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Resolving package dependencies<span class="p">&amp;</span>hellip<span class="p">;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;The following <span class="m">2</span> NEW packages are going to be installed:
+</span><span class='line'>  <span class="nb">bind bind</span>-chrootenv&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;2 new packages to install.
+</span><span class='line'>Overall download size: 316.3 KiB. After the operation, additional 717.7 KiB will be used.
+</span><span class='line'>Continue? <span class="o">[</span>y/n/? shows all options<span class="o">]</span> <span class="o">(</span>y<span class="o">)</span>: y
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64                                                                                                                                                   <span class="o">(</span><span class="p">&amp;</span>frac12<span class="p">;</span><span class="o">)</span>,  33.4 KiB <span class="o">(</span>  1.6 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1.x86_64.rpm <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span><span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Retrieving package <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64                                                                                                                                                             <span class="o">(</span>2/2<span class="o">)</span>, 282.9 KiB <span class="o">(</span>716.1 KiB unpacked<span class="o">)</span>
+</span><span class='line'>Retrieving: <span class="nb">bind</span>-9.9.4P2-2.8.1.x86_64.rpm <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span>.<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'><span class="o">(</span><span class="p">&amp;</span>frac12<span class="p">;</span><span class="o">)</span> Installing: <span class="nb">bind</span>-chrootenv-9.9.4P2-2.8.1 <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span>..<span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>Updating /etc/sysconfig/syslog<span class="p">&amp;</span>hellip<span class="p">;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;<span class="o">(</span>2/2<span class="o">)</span> Installing: <span class="nb">bind</span>-9.9.4P2-2.8.1 <span class="p">&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;&amp;</span>hellip<span class="p">;</span><span class="o">[</span><span class="k">done</span><span class="o">]</span>
+</span><span class='line'>Additional rpm output:
+</span><span class='line'>Updating /etc/sysconfig/named<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'>wrote key file <span class="p">&amp;</span>ldquo<span class="p">;</span>/etc/rndc.key<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>dns.pp </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">h1</span><span class="o">&gt;</span><span class="na">Server</span><span class="p">::</span><span class="na">dns</span><span class="o">&lt;/</span><span class="na">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="na">server</span><span class="p">::</span><span class="na">dns</span> <span class="p">{</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">pre</span><span class="o">&gt;&lt;</span><span class="na">code</span><span class="o">&gt;</span>    <span class="k">package</span> <span class="p">{</span> <span class="s">&quot;bind&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">service</span> <span class="p">{</span> <span class="s">&quot;named.service&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">running</span><span class="p">,</span> <span class="na">enable</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">true</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">define</span> <span class="na">conf</span> <span class="p">(</span>
+</span><span class='line'>                    <span class="nv">$directory</span>              <span class="o">=</span> <span class="s">&quot;/var/lib/named&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$managed_keys_directory</span> <span class="o">=</span> <span class="s">&quot;/var/lib/named/dyn/&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$dump_file</span>              <span class="o">=</span> <span class="s">&quot;/var/log/named_dump.db&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$statistics_file</span>        <span class="o">=</span> <span class="s">&quot;/var/log/named.stats&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$forwarders</span>             <span class="o">=</span> <span class="p">[],</span>
+</span><span class='line'>                    <span class="nv">$forward</span>                <span class="o">=</span> <span class="s">&quot;only&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nv">$listen_on_v6</span>           <span class="o">=</span> <span class="s">&quot;none&quot;</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">File</span> <span class="p">{</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span><span class="p">,</span> <span class="na">require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;bind&quot;</span><span class="p">],</span> <span class="k">notify</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Service</span><span class="p">[</span><span class="s">&quot;named.service&quot;</span><span class="p">]</span> <span class="p">}</span><span class="c"></span>
+</span><span class='line'>
+</span><span class='line'><span class="c">    # Configuration files</span>
+</span><span class='line'>    <span class="k">file</span> <span class="p">{</span> <span class="nv">$name</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span><span class="p">,</span> <span class="na">content</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">template</span><span class="p">(</span><span class="s">&quot;server/dns/named_conf.erb&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">file</span> <span class="p">{</span> <span class="s">&quot;/etc/named.d/rndc-access.conf&quot;</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of server::dns::conf defination</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">    # Root Zone</span>
+</span><span class='line'>    <span class="na">conf</span> <span class="p">{</span> <span class="s">&#39;/etc/named.conf&#39;</span> <span class="p">:</span>
+</span><span class='line'>                    <span class="na">forwarders</span>      <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;192.168.1.2&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="na">zones</span>           <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&#39;.&#39;</span>                     <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type hint&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;root.hint&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                    # Forward Zone</span>
+</span><span class='line'>                    <span class="s">&#39;localhost&#39;</span>             <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;localhost.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                    <span class="s">&#39;example.com&#39;</span>           <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/example.com&quot;&#39;</span><span class="p">],</span><span class="c"></span>
+</span><span class='line'><span class="c">                    # Reverse Zone</span>
+</span><span class='line'>                    <span class="s">&#39;0.0.127.in-addr.arpa&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;127.0.0.zone&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                    <span class="s">&#39;1.168.192.in-addr.arpa&#39;</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="p">[</span> <span class="s">&#39;type master&#39;</span><span class="p">,</span> <span class="s">&#39;file &quot;master/192.168.1.rev&quot;&#39;</span><span class="p">],</span>
+</span><span class='line'>                     <span class="p">}</span><span class="c"> # End of Zones</span>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of conf </span>
+</span><span class='line'><span class="o">&lt;/</span><span class="na">code</span><span class="o">&gt;&lt;/</span><span class="na">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="p">}</span><span class="c"> # End of DNS</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>named_conf.erb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;h1&gt;Generated by Puppet&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;options {&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;pre&gt;&lt;code&gt;directory &quot;&amp;lt;%=@directory%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">managed-keys-directory &quot;&amp;lt;%=@managed_keys_directory%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">dump-file &quot;&amp;lt;%=@dump_file%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">statistics-file &quot;&amp;lt;%=@statistics_file%&amp;gt;&quot;;</span>
+</span><span class='line'><span class="x">forwarders { &amp;lt;%=@forwarders%&amp;gt;; };</span>
+</span><span class='line'><span class="x">forward &amp;lt;%=@forward%&amp;gt;;</span>
+</span><span class='line'><span class="x">listen-on-v6 { &amp;lt;%=@listen_on_v6%&amp;gt;; };</span>
+</span><span class='line'><span class="x">notify no;</span>
+</span><span class='line'><span class="x">disable-empty-zone &quot;1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.IP6.ARPA&quot;;</span>
+</span><span class='line'><span class="x">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;};&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;&amp;lt;% if !@zones.empty? </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">/&lt;em&gt; Global zones &lt;/em&gt;/</span>
+</span><span class='line'><span class="x">&amp;lt;% @zones.sort_by {|key, value| key}.each do |key,value| </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">zone &amp;ldquo;&amp;lt;%= key </span><span class="err">%&gt;</span><span class="x">&amp;rdquo; in {</span>
+</span><span class='line'><span class="x">&amp;lt;% value.each do |line| </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &amp;lt;%= line </span><span class="err">%&gt;</span><span class="x">;</span>
+</span><span class='line'><span class="x">&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">};&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">&lt;p&gt;&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&amp;lt;% end </span><span class="err">-%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

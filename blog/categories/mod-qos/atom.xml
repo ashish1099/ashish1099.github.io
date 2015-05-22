@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Mod_qos | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/mod-qos/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Apache 2.4 With Mod_QOS]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/16/apache-2-dot-4-with-mod-qos/"/>
+    <updated>2014-07-16T13:01:49+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/16/apache-2-dot-4-with-mod-qos</id>
+    <content type="html"><![CDATA[<p>Just a basic info about qos.</p>
+
+<ol>
+<li>Create policy based on number of request or on bandwidth and lot more.</li>
+<li>Event request controlling Mechanism</li>
+<li>Mitigate DDoS attacks.</li>
+</ol>
+
+
+<p><a href="http://opensource.adnovum.ch/mod_qos/">More can be found over here</a></p>
+
+<!-- more -->
+
+
+<p>Current working enviornment is OpenSuSE 13.1 with Apache 2.4</p>
+
+<p>Install Apache
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>zypper install apache2 apache2-worker
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Download latest mod_qos <a href="http://sourceforge.net/projects/mod-qos/files/">from this location</a>
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>tar xvf mod_qos-11.4.tar.gz
+</span><span class='line'><span class="nb">cd </span>mod_qos-11.4
+</span><span class='line'><span class="nb">cd </span>mod_qos-11.4/apache2 <span class="p">&amp;</span>amp<span class="p">;&amp;</span>amp<span class="p">;</span> /usr/sbin/apxs2 -I /usr/include/apache2-worker/ -ci mod_qos.c<span class="err">&quot;</span>
+</span><span class='line'>/usr/lib64/apr-1/build/libtool <span class="p">&amp;</span>ndash<span class="p">;</span>silent <span class="p">&amp;</span>ndash<span class="p">;</span><span class="nv">mode</span><span class="o">=</span>compile gcc -std<span class="o">=</span>gnu99 -prefer-pic -fmessage-length<span class="o">=</span><span class="m">0</span> -grecord-gcc-switches -fstack-protector -O2 -Wall -D_FORTIFY_SOURCE<span class="o">=</span><span class="m">2</span> -funwind-tables -fasynchronous-unwind-tables -g -fPIC -Wall -DLDAP_DEPRECATED  -DLINUX -D_REENTRANT -D_GNU_SOURCE -pthread -I/usr/include/apache2  -I/usr/include/apr-1   -I/usr/include/apr-1 -I/usr/include -I/usr/include/apache2-worker/  -c -o mod_qos.lo mod_qos.c <span class="p">&amp;</span>amp<span class="p">;&amp;</span>amp<span class="p">;</span> touch mod_qos.slo
+</span><span class='line'>/usr/lib64/apr-1/build/libtool <span class="p">&amp;</span>ndash<span class="p">;</span>silent <span class="p">&amp;</span>ndash<span class="p">;</span><span class="nv">mode</span><span class="o">=</span>link gcc -std<span class="o">=</span>gnu99    -o mod_qos.la  -rpath /usr/lib64/apache2 -module -avoid-version    mod_qos.lo
+</span><span class='line'>/usr/share/apache2/build/instdso.sh <span class="nv">SH_LIBTOOL</span><span class="o">=</span><span class="p">&amp;</span>lsquo<span class="p">;</span>/usr/lib64/apr-1/build/libtool<span class="p">&amp;</span>rsquo<span class="p">;</span> mod_qos.la /usr/lib64/apache2
+</span><span class='line'>/usr/lib64/apr-1/build/libtool <span class="p">&amp;</span>ndash<span class="p">;</span><span class="nv">mode</span><span class="o">=</span>install install mod_qos.la /usr/lib64/apache2/
+</span><span class='line'>libtool: install: install .libs/mod_qos.so /usr/lib64/apache2/mod_qos.so
+</span><span class='line'>libtool: install: install .libs/mod_qos.lai /usr/lib64/apache2/mod_qos.la&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2&gt;libtool: finish: <span class="nv">PATH</span><span class="o">=</span><span class="p">&amp;</span>ldquo<span class="p">;</span>/sbin:/usr/sbin:/usr/local/sbin:/root/bin:/usr/local/bin:/usr/bin:/bin:/usr/X11R6/bin:/usr/games:/opt/bin:/sbin<span class="p">&amp;</span>rdquo<span class="p">;</span> ldconfig -n /usr/lib64/apache2&lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Libraries have been installed in:
+</span><span class='line'>   /usr/lib64/apache2&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;If you ever happen to want to link against installed libraries
+</span><span class='line'>in a given directory, LIBDIR, you must either use libtool, and
+</span><span class='line'>specify the full pathname of the library, or use the &lt;code&gt;-LLIBDIR<span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">flag during linking and do at least one of the following:</span>
+</span><span class='line'><span class="s1">   - add LIBDIR to the&lt;/code&gt;LD_LIBRARY_PATH&#39;</span> environment variable
+</span><span class='line'>     during execution
+</span><span class='line'>   - add LIBDIR to the &lt;code&gt;LD_RUN_PATH<span class="s1">&#39; environment variable</span>
+</span><span class='line'><span class="s1">     during linking</span>
+</span><span class='line'><span class="s1">   - use the&lt;/code&gt;-Wl,-rpath -Wl,LIBDIR&#39;</span> linker flag
+</span><span class='line'>   - have your system administrator add LIBDIR to <span class="sb">`</span>/etc/ld.so.conf<span class="err">&#39;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;See any operating system documentation about shared libraries <span class="k">for</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h2&gt;more information, such as the ld<span class="o">(</span>1<span class="o">)</span> and ld.so<span class="o">(</span>8<span class="o">)</span> manual pages.&lt;/h2&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;chmod <span class="m">755</span> /usr/lib64/apache2/mod_qos.so
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>If you see the Output like this that means mod_qos is installed and you just have to load it in apache.</p>
+
+<p>We will add a line in this file <code>/etc/apache2/sysconfig.d/loadmodule.conf</code>
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>LoadModule qos_module                     /usr/lib64/apache2/mod_qos.so
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can load mod_qos for all the virtualhost or to any specific virtualhost. I&rsquo;m adding to a specific one.</p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;VirtualHost *:80&gt;
+</span><span class='line'>    ServerName        www.example.com
+</span><span class='line'>    DocumentRoot      /web/example.com/
+</span><span class='line'>    ServerAdmin       &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#116;&amp;#x6f;&amp;#x3a;&amp;#119;&amp;#x65;&amp;#98;&amp;#109;&amp;#97;&amp;#115;&amp;#x74;&amp;#x65;&amp;#114;&amp;#64;&amp;#101;&amp;#x78;&amp;#x61;&amp;#x6d;&amp;#112;&amp;#x6c;&amp;#101;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#x6d;&quot;</span>&gt;<span class="p">&amp;</span><span class="c">#119;&amp;#101;&amp;#x62;&amp;#109;&amp;#97;&amp;#x73;&amp;#x74;&amp;#x65;&amp;#114;&amp;#x40;&amp;#x65;&amp;#x78;&amp;#x61;&amp;#x6d;&amp;#112;&amp;#x6c;&amp;#101;&amp;#x2e;&amp;#x63;&amp;#x6f;&amp;#x6d;&lt;/a&gt;</span>
+</span><span class='line'>    ErrorLog          /var/log/apache2/example.com-error_log
+</span><span class='line'>    TransferLog       /var/log/apache2/example.com-access_log
+</span><span class='line'>    ServerSignature   Off
+</span><span class='line'>    HostnameLookups   Off
+</span><span class='line'>    Options           -Indexes -FollowSymLinks
+</span><span class='line'>    <span class="c">#&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;-</span>
+</span><span class='line'>    &lt;Directory <span class="s2">&quot;/web/example.com&quot;</span>&gt;
+</span><span class='line'>        Allow        from all
+</span><span class='line'>    &lt;/Directory&gt;
+</span><span class='line'>    &lt;IfModule mod_qos.c&gt;
+</span><span class='line'>        &lt;Location /qos&gt;
+</span><span class='line'>           SetHandler qos-viewer
+</span><span class='line'>        &lt;/Location&gt;
+</span><span class='line'>    &lt;/IfModule&gt;
+</span><span class='line'>&lt;/VirtualHost&gt;
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can check the status of mod_qos on this link. <strong>NOTE</strong> change the domainname.</p>
+
+<p><code>http://domain.name.com/qos?option=ip&amp;action=enable&amp;refresh=</code></p>
+]]></content>
+  </entry>
+  
+</feed>

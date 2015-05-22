@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Cpanminus | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/cpanminus/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Automate Installation of Perl Modules Using Cpanminus Manager]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/"/>
+    <updated>2014-11-11T21:31:46+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus</id>
+    <content type="html"><![CDATA[<p>This manifest will help you to install perl libraries directly from cpan, You can set you cpan local repository or you can use any cpan mirror out there.
+All I did is created a defination to install the perl libraries from cpan repository.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">h1</span><span class="o">&gt;</span><span class="na">Install</span> <span class="na">perl</span> <span class="na">modules</span> <span class="na">from</span> <span class="na">cpan</span><span class="o">&lt;/</span><span class="na">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="na">cpan</span> <span class="p">{</span><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">pre</span><span class="o">&gt;&lt;</span><span class="na">code</span><span class="o">&gt;</span><span class="k">package</span> <span class="p">{</span> <span class="p">[</span> <span class="s">&#39;perl-YAML-Perl&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Error&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-DistnameInfo&#39;</span><span class="p">,</span> <span class="s">&#39;perl-CPAN-Meta-Check&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;perl-File-pushd&#39;</span><span class="p">,</span> <span class="s">&#39;perl-local-lib&#39;</span><span class="p">,</span> <span class="s">&#39;perl-Module-CPANfile&#39;</span><span class="p">,</span> <span class="s">&#39;perl-App-cpanminus&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;perl-aliased&#39;</span><span class="p">,</span> <span class="s">&#39;make&#39;</span> <span class="p">]</span> <span class="p">:</span> <span class="na">ensure</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">present</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">define</span> <span class="na">perl</span> <span class="p">(</span> <span class="nv">$cpan_repo</span> <span class="o">=</span> <span class="s">&quot;http://mirror.teklinks.com/CPAN/&quot;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">exec</span> <span class="p">{</span> <span class="s">&quot;$name&quot;</span> <span class="p">:</span>
+</span><span class='line'>        <span class="na">command</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;cpanm --mirror $cpan_repo --mirror-only $name&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="na">require</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="k">Package</span><span class="p">[</span><span class="s">&quot;make&quot;</span><span class="p">,</span> <span class="s">&quot;perl-App-cpanminus&quot;</span> <span class="p">],</span>
+</span><span class='line'>        <span class="na">unless</span> <span class="o">=</span><span class="err">&amp;</span><span class="na">gt</span><span class="p">;</span> <span class="s">&quot;perldoc -l $name&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="c"> # End of cpan_perl</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="na">code</span><span class="o">&gt;&lt;/</span><span class="na">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="p">}</span><span class="c"> #End of perl</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can add like this in your example.pp</p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='puppet'><span class='line'><span class="o">&lt;/</span><span class="na">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="na">p</span><span class="o">&gt;</span><span class="na">cpan</span><span class="p">::</span><span class="na">perl</span> <span class="p">{</span> <span class="err">&amp;</span><span class="na">ldquo</span><span class="p">;</span><span class="na">Text</span><span class="p">::</span><span class="na">ASCIITable</span><span class="err">&amp;</span><span class="na">rdquo</span><span class="p">;</span> <span class="p">:</span>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

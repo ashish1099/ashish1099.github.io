@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ruby subcene.com Subtitle Downloader - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="I have written a ruby script in which it will download the subtitle as you need. To demonstrate more in this, I would like to share why I did this. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="ashish1099.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ruby subcene.com Subtitle Downloader</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-15T09:14:28+05:30'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:14 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I have written a ruby script in which it will download the subtitle as you need. To demonstrate more in this, I would like to share  why I did this. Because I was tried of going onto subscene.com
+and searching for a movie and then download the subtitle and then unzip it. which was very painful for me.</p>
+
+<p>This let me write a small ruby wrapper to do all this thing automatically. This basically takes 4 arguments, like <code>--movie_name</code> <code>--year</code> <code>--resolution</code> and if you want any specific ripper subtitle then you can pass <code>--author</code>.
+Just copy this script under <code>$PATH</code> and run <code>subscene</code> like this</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># subscene </span>
+</span><span class='line'>Missing options: movie_name, year, resolution
+</span><span class='line'>*** Subcene subtitle downloader ***
+</span><span class='line'>Usage : subscene -m deliver-us-from-evil -y <span class="m">2014</span> -r 720
+</span><span class='line'>    -m, --movie_name                 Name of the Movie
+</span><span class='line'>    -y, --year                       Year of the Movie
+</span><span class='line'>    -r, --resolution                 Resolution of the Movie
+</span><span class='line'>    -a, --author                     Author/Ripper of the Movie
+</span><span class='line'>    -h, --help                       Display this screen
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This show that it is looking for some arguments, so we will pass it then. As an example, I&rsquo;m taking this movie <code>22 Jump Street</code></p>
+
+<p><strong>NOTE</strong> :
+Movie name should be in this format <code>"22-jump-street"</code> <code>"gotham-first-season"</code> <code>"lost-sixth-season"</code> or <code>"deliver-us-from-evil"</code></p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># subscene -m 22-jump-street -y 2014 -r 720 -a YIFY`</span>
+</span><span class='line'>Successfully saved 22.Jump.Street.2014.720p.BluRay.x264-SPARKS.srt at /home/Movies/
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>subscene </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/ruby</span>
+</span><span class='line'><span class="c1"># Ashish Jaiswal</span>
+</span><span class='line'><span class="c1"># Date 12-10-2014</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;nokogiri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;zip&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;optparse&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">red</span><span class="p">;</span>            <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[31m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">green</span><span class="p">;</span>          <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[32m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">brown</span><span class="p">;</span>          <span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[33m</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">optparse</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">opts</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">banner</span> <span class="o">=</span> <span class="s2">&quot;*** Subcene subtitle downloader ***</span><span class="se">\n</span><span class="s2">Usage : subscene -m deliver-us-from-evil -y 2014 -r 720&quot;</span><span class="o">.</span><span class="n">green</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;--movie_name movie_name&quot;</span><span class="p">,</span> <span class="s2">&quot;Name of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">movie</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span> <span class="o">=</span>  <span class="n">movie</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-y&quot;</span><span class="p">,</span> <span class="s2">&quot;--year year&quot;</span><span class="p">,</span> <span class="s2">&quot;Year of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">year</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:year</span><span class="o">]</span> <span class="o">=</span> <span class="n">year</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--resolution res&quot;</span><span class="p">,</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">DecimalInteger</span><span class="p">,</span> <span class="s2">&quot;Resolution of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">res</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:resolution</span><span class="o">]</span> <span class="o">=</span> <span class="n">res</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;-a&quot;</span><span class="p">,</span> <span class="s2">&quot;--author author&quot;</span><span class="p">,</span> <span class="s2">&quot;Author/Ripper of the Movie&quot;</span><span class="o">.</span><span class="n">brown</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">author</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">options</span><span class="o">[</span><span class="ss">:author</span><span class="o">]</span> <span class="o">=</span> <span class="n">author</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># This displays the help screen, all programs are assumed to have this option.</span>
+</span><span class='line'>  <span class="n">opts</span><span class="o">.</span><span class="n">on</span><span class="p">(</span> <span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;--help&#39;</span><span class="p">,</span> <span class="s1">&#39;Display this screen&#39;</span><span class="o">.</span><span class="n">brown</span> <span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">opts</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">optparse</span><span class="o">.</span><span class="n">parse!</span>
+</span><span class='line'>  <span class="n">mandatory</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:movie_name</span><span class="p">,</span> <span class="ss">:year</span><span class="p">,</span> <span class="ss">:resolution</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">missing</span> <span class="o">=</span> <span class="n">mandatory</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span> <span class="n">param</span> <span class="o">|</span> <span class="n">options</span><span class="o">[</span><span class="n">param</span><span class="o">].</span><span class="n">nil?</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Missing options: </span><span class="si">#{</span><span class="n">missing</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">red</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">optparse</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">ParseError</span><span class="p">,</span> <span class="no">OptionParser</span><span class="o">::</span><span class="no">MissingArgument</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Error: </span><span class="si">#{</span><span class="vg">$!</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="nb">exit</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># To open the link and parse</span>
+</span><span class='line'><span class="n">subscene_page</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;http://subscene.com/subtitles/</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span><span class="si">}</span><span class="s2">/english&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># To get the first Movie Name with Ripper</span>
+</span><span class='line'><span class="n">subscene_name</span> <span class="o">=</span> <span class="n">subscene_page</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.content.clearfix table tbody tr td.a1 a span&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span> <span class="nb">p</span> <span class="o">|</span> <span class="nb">p</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;English&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span> <span class="p">}</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:year</span><span class="o">]</span><span class="si">}</span><span class="sr">.</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:resolution</span><span class="o">]</span><span class="si">}</span><span class="sr">p.BluRay.x264-</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:author</span><span class="o">]</span><span class="si">}</span><span class="sr">/</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Hash method used to bind name and url</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[</span><span class="n">subscene_page</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;div.content.clearfix table tbody tr td.a1 a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span> <span class="n">i</span> <span class="o">|</span> <span class="o">[</span><span class="n">i</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;English&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">i</span><span class="o">[</span><span class="s1">&#39;href&#39;</span><span class="o">]]</span> <span class="p">}</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Getting the actual link </span>
+</span><span class='line'><span class="n">subtitle_link</span> <span class="o">=</span> <span class="s2">&quot;http://subscene.com</span><span class="si">#{</span><span class="n">a</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/[\[\]\&quot;]/</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Parsing the actual link</span>
+</span><span class='line'><span class="n">download_page</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subtitle_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Getting the download link</span>
+</span><span class='line'><span class="n">download_link</span> <span class="o">=</span> <span class="n">download_page</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;div.download a&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="s1">&#39;href&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Saving the file</span>
+</span><span class='line'><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">file</span> <span class="o">&lt;&lt;</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;http://subscene.com/</span><span class="si">#{</span><span class="n">download_link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Unzipping it</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">unzip_file</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+</span><span class='line'><span class="no">Zip</span><span class="o">::</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">zip_file</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">zip_file</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">f_path</span><span class="o">=</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">f_path</span><span class="p">))</span>
+</span><span class='line'>  <span class="n">zip_file</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_path</span><span class="p">)</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+</span><span class='line'>  <span class="vg">$zipname</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Remove the stall zip file after unzipping</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">remove_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Actual Movie to grep and copy file</span>
+</span><span class='line'><span class="n">movie_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:movie_name</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get the movie path in /home/Movies directory</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Dir</span><span class="o">.</span><span class="n">entries</span><span class="p">(</span><span class="s1">&#39;/home/Movies&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span><span class="o">|</span><span class="n">entry</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span> <span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;/home/Movies&#39;</span><span class="p">,</span><span class="n">entry</span><span class="p">)</span> <span class="ow">and</span> <span class="o">!</span><span class="p">(</span><span class="n">entry</span> <span class="o">==</span><span class="s1">&#39;.&#39;</span> <span class="o">||</span> <span class="n">entry</span> <span class="o">==</span> <span class="s1">&#39;..&#39;</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/</span><span class="si">#{</span><span class="n">movie_path</span><span class="si">}</span><span class="sr">/i</span><span class="p">)</span>
+</span><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="s2">&quot;/home/Movies/&quot;</span>
+</span><span class='line'><span class="n">joinner</span> <span class="o">=</span> <span class="o">[</span> <span class="nb">p</span><span class="p">,</span> <span class="n">a</span><span class="o">].</span><span class="n">join</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Calling the defination</span>
+</span><span class='line'><span class="n">unzip_file</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">,</span> <span class="n">joinner</span><span class="p">)</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;Successfully saved </span><span class="si">#{</span><span class="vg">$zipname</span><span class="si">}</span><span class="s2"> at </span><span class="si">#{</span><span class="n">joinner</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="n">remove_file</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="s2">.zip&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-10-15T09:14:28+05:30'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>9:14 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/script/'>script</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/" data-via="" data-counturl="http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server/" title="Previous Post: Convert CentOS/Scientific Linux to RHEL server">&laquo; Convert CentOS/Scientific Linux to RHEL server</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/" title="Next Post: Automate installation of perl modules using cpanminus manager">Automate installation of perl modules using cpanminus manager &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/26/drbd-automatic-failover-without-cluster/">DRBD Automatic Failover Without Cluster</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/13/my-first-puppet-types-and-providers/">My First Puppet Types and Providers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/">Automate Installation of Perl Modules Using Cpanminus Manager</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/">Ruby subcene.com Subtitle Downloader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server/">Convert CentOS/Scientific Linux to RHEL Server</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

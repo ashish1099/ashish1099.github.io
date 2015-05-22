@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>DRBD Automatic Failover Without Cluster - My Octopress Blog</title>
+  <meta name="author" content="Your Name">
+
+  
+  <meta name="description" content="I have written a script to do a failover of DRBD resources. This script will get the drbd start mount the partition,
+and start the nfsserver and &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My Octopress Blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="ashish1099.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">DRBD Automatic Failover Without Cluster</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-12-26T13:54:19+05:30'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>1:54 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I have written a script to do a failover of DRBD resources. This script will get the drbd start mount the partition,
+and start the nfsserver and samba server and the get virtual IP setup.</p>
+
+<p>This script won&rsquo;t be useful for many, which are having a mix envrionment. such as node having some resource as primary and some as secondary.
+Reason behind this, that we where not able to use pacemaker in our current enviornment. Though we are not using this in production enviornment.</p>
+
+<p>Put this in your systemd bootup process. <a href="https://wiki.archlinux.org/index.php/Systemd_FAQ#How_can_I_make_a_script_start_during_the_boot_process.3F">check this</a></p>
+
+<p>Please use it and let me know.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>drbd_auto.sh </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'><span class="c"># Ashish Jaiswal</span>
+</span><span class='line'><span class="c"># Date 16th Dec 2014</span>
+</span><span class='line'><span class="c"># This script expects the primary host to be primary node</span>
+</span><span class='line'><span class="c"># for all the drbd resources.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># List of resource on the node.</span>
+</span><span class='line'><span class="nv">res</span><span class="o">=</span><span class="k">$(</span>cat /etc/drbd.d/*.res <span class="p">|</span> grep resource <span class="p">|</span> cut -d <span class="s2">&quot; &quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># eth1 is the interface which we going to assign floating IP</span>
+</span><span class='line'><span class="nv">device_id</span><span class="o">=</span>eth1
+</span><span class='line'>
+</span><span class='line'><span class="c"># This is the floating IP</span>
+</span><span class='line'><span class="nv">ip</span><span class="o">=</span><span class="s2">&quot;192.168.1.100&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> services <span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Declaring an array of the services, we want to be stop or start</span>
+</span><span class='line'>  <span class="nv">service_name</span><span class="o">=(</span>nfsserver smb nmb<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> var in <span class="k">${</span><span class="nv">service_name</span><span class="p">[@]</span><span class="k">}</span>
+</span><span class='line'>  <span class="k">do</span>
+</span><span class='line'>    systemctl is-active <span class="nv">$var</span> <span class="p">|</span> grep ^active &gt; /dev/null
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      systemctl <span class="nv">$1</span> <span class="nv">$var</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>  <span class="k">done</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> check_ip <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Check whether the ip is present or not</span>
+</span><span class='line'>  <span class="nv">primary_ip</span><span class="o">=</span><span class="k">$(</span>ip -o -4 addr show <span class="nv">$device_id</span> <span class="p">|</span> awk -F <span class="s1">&#39;[ /]+&#39;</span> <span class="s1">&#39;/global/ {print $4}&#39;</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># Add ip if is not present </span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$primary_ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>   ip address add <span class="nv">$ip</span> dev <span class="nv">$device_id</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> mount_status <span class="o">{</span>
+</span><span class='line'>  mountpoint -q /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      mount /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">function</span> drbd_failover <span class="o">{</span>
+</span><span class='line'>  drbdadm primary --force <span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>    <span class="nb">echo</span> -e <span class="s2">&quot;There seems to be some major problem,\nPlease login to `hostname` and fix the error.&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD failover Unsuccessful&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>    <span class="nb">exit </span>1
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> resource in <span class="nv">$res</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c"># To get the current state of the resources.</span>
+</span><span class='line'>  <span class="nv">pri_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f <span class="m">1</span> <span class="p">|</span> egrep <span class="s2">&quot;Unknown|Primary|Secondary&quot;</span><span class="k">)</span>
+</span><span class='line'>  <span class="nv">sec_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f <span class="m">2</span> <span class="p">|</span> egrep <span class="s2">&quot;Unknown|Primary|Secondary&quot;</span><span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># If the node has a primary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    mount_status <span class="nv">$resource</span>
+</span><span class='line'>    services start
+</span><span class='line'>    check_ip
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;This is primary node for $resource resource on `hostname`&quot;</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c"># If the node has a secondary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Secondary <span class="o">]</span> <span class="o">||</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    ping -c2 <span class="nv">$ip</span> &gt; /dev/null <span class="o">&amp;&amp;</span> mountpoint -q /<span class="nv">$resource</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span>
+</span><span class='line'>    <span class="k">then</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;$resource is available on Primary, This is a secondary node.&quot;</span>
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        drbd_failover <span class="nv">$resource</span>
+</span><span class='line'>        mount_status <span class="nv">$resource</span>
+</span><span class='line'>        services start
+</span><span class='line'>        check_ip
+</span><span class='line'>        logger <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD Successful Failover&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Secondary <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        <span class="nb">echo</span> -e <span class="s2">&quot;Split brain detected, Please fix manually\n\nAll these command need to be ran\n# drbdadm secondary &lt;resource&gt;\n# drbdadm connect --discard-my-data &lt;resource&gt;\n\nOn the other node (the split brain survivor), if its connection state is also StandAlone\n# drbdadm connect &lt;resource&gt;\n\nHere is drbd doc link http://www.drbd.org/users-guide/s-resolve-split-brain.html&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD SplitBrain Detected&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>      <span class="k">fi</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      services stop
+</span><span class='line'>      logger <span class="s2">&quot;This is seconday node of $resource. So nothing to be done on this server, because Primary is Active at this moment&quot;</span>
+</span><span class='line'>    <span class="k">fi</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Your Name</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-12-26T13:54:19+05:30'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>1:54 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/bash/'>bash</a>, <a class='category' href='/blog/categories/drbd/'>drbd</a>, <a class='category' href='/blog/categories/script/'>script</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster/" data-via="" data-counturl="http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/13/my-first-puppet-types-and-providers/" title="Previous Post: My first puppet types and providers">&laquo; My first puppet types and providers</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/26/drbd-automatic-failover-without-cluster/">DRBD Automatic Failover Without Cluster</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/13/my-first-puppet-types-and-providers/">My First Puppet Types and Providers</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/11/automate-installation-of-perl-modules-from-cpan-from-cpanminus/">Automate Installation of Perl Modules Using Cpanminus Manager</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/">Ruby subcene.com Subtitle Downloader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/19/convert-centos-slash-scientific-linux-to-rhel-server/">Convert CentOS/Scientific Linux to RHEL Server</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Your Name -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

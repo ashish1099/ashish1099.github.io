@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Virtualization | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/virtualization/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to Setup Vagrant]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant/"/>
+    <updated>2014-07-01T12:38:48+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/07/01/how-to-setup-vagrant</id>
+    <content type="html"><![CDATA[<p>What is Vagrant ?</p>
+
+<p>The big question, which I was thinking, when I first heard of it. So today finally got a chance to do some hands on.
+Basically it is a tools which gives you running VM, whenever you need it with all your environment set in place.
+So what was that huh? Consider that you are creating a VM or clonning a VM and starting it up and running some script to get
+the environment set in place. So why not automate this whole thing by vagrant.</p>
+
+<p>Vagrant allows you to launch VMs with provisioning on top of it.</p>
+
+<!-- more -->
+
+
+<p><img src="https://raw.githubusercontent.com/ashish1099/ashish1099.github.io/master/images/blog_images/logo_vagrant.png" alt="Image" /></p>
+
+<p><strong>Some Nomenclature</strong></p>
+
+<p><em><code>box</code></em> : Base image of an OS, <a href="https://docs.vagrantup.com/v2/boxes.html">Read here</a></p>
+
+<p><em><code>Provider</code></em> : Hyperviosr in which VMs are going to run. These are Virtualbox, VMware and many more. <a href="https://docs.vagrantup.com/v2/providers/index.html">Read here</a></p>
+
+<p><em><code>Provising</code></em> : Tools like Puppet, Chef, Ansibal and ofcourse Shell script. <a href="https://docs.vagrantup.com/v2/provisioning/index.html">Read here</a></p>
+
+<p><code>Working environment is Ubuntu 12.04</code></p>
+
+<p>Install this packages
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get install dpkg-dev virtualbox linux-headers-generic linux-image-generic linux-generic vagrant
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Know the Virtualbox and Vagrant is installed, we will add <code>box</code> in vagrant.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box add precise32 &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://files.vagrantup.com/precise32.box&quot;</span>&gt;http://files.vagrantup.com/precise32.box&lt;/a&gt;
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>It will take some time, and depends on your bandwidth. After the download is completed, there will be a <code>Vagrantfile</code> in the working directory.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>ls -l
+</span><span class='line'>-rw-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>  <span class="m">1</span> ajaiswal ajaiswal <span class="m">3876</span> Jul  <span class="m">1</span> 12:31 Vagrantfile
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Open the Vagrantfile and change this line to
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>config.vm.box <span class="o">=</span> <span class="p">&amp;</span>ldquo<span class="p">;</span>precise32<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>You can list the boxes, like this
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant box list
+</span><span class='line'>precise32
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Now we can start the box with this command.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant up
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Importing base box <span class="p">&amp;</span>lsquo<span class="p">;</span>precise32<span class="p">&amp;</span>rsquo<span class="p">;&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> The guest additions on this VM <span class="k">do</span> not match the install version of
+</span><span class='line'>VirtualBox! This may cause things such as forwarded ports, shared
+</span><span class='line'>folders, and more to not work properly. If any of those things fail on
+</span><span class='line'>this machine, please update the guest additions and repackage the
+</span><span class='line'>box.&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Guest Additions Version: 4.2.0
+</span><span class='line'>VirtualBox Version: 4.1.12
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Matching MAC address <span class="k">for</span> NAT networking<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>forwarded ports<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Forwarding ports<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> <span class="p">&amp;</span>ndash<span class="p">;</span> <span class="nv">22</span> <span class="o">=</span>&gt; <span class="m">2222</span> <span class="o">(</span>adapter 1<span class="o">)</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Creating shared folders metadata<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Clearing any previously <span class="nb">set </span>network interfaces<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Booting VM<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Waiting <span class="k">for</span> VM to boot. This can take a few minutes.
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> VM booted and ready <span class="k">for</span> use!
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> Mounting shared folders<span class="p">&amp;</span>hellip<span class="p">;</span>
+</span><span class='line'><span class="o">[</span>default<span class="o">]</span> <span class="p">&amp;</span>ndash<span class="p">;</span> v-root: /vagrant
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Then we will login into the box.
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ajaiswal@c-0242:~<span class="nv">$ </span>vagrant ssh
+</span><span class='line'>Welcome to Ubuntu 12.04 LTS <span class="o">(</span>GNU/Linux 3.2.0-23-generic-pae i686<span class="o">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;ul&gt;
+</span><span class='line'>&lt;li&gt;Documentation:  &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://help.ubuntu.com/&quot;</span>&gt;https://help.ubuntu.com/&lt;/a&gt;
+</span><span class='line'>Welcome to your Vagrant-built virtual machine.
+</span><span class='line'>Last login: Fri Sep <span class="m">14</span> 06:22:31 <span class="m">2012</span> from 10.0.2.2
+</span></code></pre></td></tr></table></div></figure></li>
+</ul>
+
+
+<p>Running some command under the box.</p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant@precise32:~<span class="nv">$ </span>ll
+</span><span class='line'>total 48
+</span><span class='line'>drwxr-xr-x <span class="m">4</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ./
+</span><span class='line'>drwxr-xr-x <span class="m">3</span> root    root    <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> ../
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant  <span class="m">114</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_history
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant  <span class="m">220</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bash_logout
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant <span class="m">3486</span> Sep <span class="m">14</span>  <span class="m">2012</span> .bashrc
+</span><span class='line'>drwx<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span> <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .cache/
+</span><span class='line'>-rwxr-xr-x <span class="m">1</span> vagrant vagrant <span class="m">6487</span> Sep <span class="m">14</span>  <span class="m">2012</span> postinstall.sh*
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant  <span class="m">675</span> Sep <span class="m">14</span>  <span class="m">2012</span> .profile
+</span><span class='line'>drwx<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span> <span class="m">2</span> vagrant vagrant <span class="m">4096</span> Sep <span class="m">14</span>  <span class="m">2012</span> .ssh/
+</span><span class='line'>-rw-r<span class="p">&amp;</span>ndash<span class="p">;</span>r<span class="p">&amp;</span>ndash<span class="p">;</span> <span class="m">1</span> vagrant vagrant    <span class="m">0</span> Sep <span class="m">14</span>  <span class="m">2012</span> .sudo_as_admin_successful
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant    <span class="m">6</span> Sep <span class="m">14</span>  <span class="m">2012</span> .vbox_version
+</span><span class='line'>-rw<span class="p">&amp;</span>mdash<span class="p">;&amp;</span>mdash<span class="p">;</span>- <span class="m">1</span> vagrant vagrant   <span class="m">12</span> Sep <span class="m">14</span>  <span class="m">2012</span> .veewee_version
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Hope this clear your basic doubts, Feel free if there is any question.</p>
+]]></content>
+  </entry>
+  
+</feed>

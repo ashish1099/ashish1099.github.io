@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Script | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/script/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[DRBD Automatic Failover Without Cluster]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster/"/>
+    <updated>2014-12-26T13:54:19+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/12/26/drbd-automatic-failover-without-cluster</id>
+    <content type="html"><![CDATA[<p>I have written a script to do a failover of DRBD resources. This script will get the drbd start mount the partition,
+and start the nfsserver and samba server and the get virtual IP setup.</p>
+
+<p>This script won&rsquo;t be useful for many, which are having a mix envrionment. such as node having some resource as primary and some as secondary.
+Reason behind this, that we where not able to use pacemaker in our current enviornment. Though we are not using this in production enviornment.</p>
+
+<p>Put this in your systemd bootup process. <a href="https://wiki.archlinux.org/index.php/Systemd_FAQ#How_can_I_make_a_script_start_during_the_boot_process.3F">check this</a></p>
+
+<p>Please use it and let me know.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>drbd_auto.sh </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;!/bin/bash&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;Ashish Jaiswal&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;Date 16th Dec 2014&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;This script expects the primary host to be primary node&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;for all the drbd resources.&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;List of resource on the node.&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;res<span class="o">=</span><span class="k">$(</span>cat /etc/drbd.d/*.res <span class="p">|</span> grep resource <span class="p">|</span> cut -d <span class="p">&amp;</span>ldquo<span class="p">;</span> <span class="p">&amp;</span>rdquo<span class="p">;</span> -f 2<span class="k">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;eth1 is the interface which we going to assign floating IP&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;device_id<span class="o">=</span>eth1&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;This is the floating IP&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;ip<span class="o">=</span><span class="p">&amp;</span>ldquo<span class="p">;</span>192.168.1.100<span class="p">&amp;</span>rdquo<span class="p">;</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;function services <span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Declaring an array of the services, we want to be stop or start</span>
+</span><span class='line'>  <span class="nv">service_name</span><span class="o">=(</span>nfsserver smb nmb<span class="o">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="k">for</span> var in <span class="k">${</span><span class="nv">service_name</span><span class="p">[@]</span><span class="k">}</span>
+</span><span class='line'>  <span class="k">do</span>
+</span><span class='line'>    systemctl is-active <span class="nv">$var</span> <span class="p">|</span> grep ^active &gt; /dev/null&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;if <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>  systemctl <span class="nv">$1</span> <span class="nv">$var</span>
+</span><span class='line'><span class="k">fi</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="k">done</span>
+</span><span class='line'><span class="o">}</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;function check_ip <span class="o">{</span>
+</span><span class='line'>  <span class="c"># Check whether the ip is present or not</span>
+</span><span class='line'>  <span class="nv">primary_ip</span><span class="o">=</span><span class="k">$(</span>ip -o -4 addr show <span class="nv">$device_id</span> <span class="p">|</span> awk -F <span class="p">&amp;</span>lsquo<span class="p">;</span><span class="o">[</span> /<span class="o">]</span>+<span class="p">&amp;</span>rsquo<span class="p">;</span> <span class="p">&amp;</span>lsquo<span class="p">;</span>/global/ <span class="o">{</span>print <span class="nv">$4</span><span class="o">}</span><span class="p">&amp;</span>rsquo<span class="p">;</span><span class="k">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="c"># Add ip if is not present</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> -z <span class="nv">$primary_ip</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>   ip address add <span class="nv">$ip</span> dev <span class="nv">$device_id</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;function mount_status <span class="o">{</span>
+</span><span class='line'>  mountpoint -q /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      mount /<span class="nv">$1</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;function drbd_failover <span class="o">{</span>
+</span><span class='line'>  drbdadm primary <span class="p">&amp;</span>ndash<span class="p">;</span>force <span class="nv">$1</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>    <span class="nb">echo</span> -e <span class="p">&amp;</span>ldquo<span class="p">;</span>There seems to be some major problem,<span class="se">\n</span>Please login to &lt;code&gt;hostname&lt;/code&gt; and fix the error.<span class="p">&amp;</span>rdquo<span class="p">;</span> <span class="p">|</span> mail -s <span class="p">&amp;</span>ldquo<span class="p">;</span>DRBD failover Unsuccessful<span class="p">&amp;</span>rdquo<span class="p">;</span>  &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;&amp;#109;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#116;&amp;#111;&amp;#58;&amp;#x61;&amp;#115;&amp;#x68;&amp;#x69;&amp;#115;&amp;#104;&amp;#49;&amp;#48;&amp;#x39;&amp;#57;&amp;#x40;&amp;#103;&amp;#x6d;&amp;#x61;&amp;#x69;&amp;#x6c;&amp;#46;&amp;#99;&amp;#x6f;&amp;#x6d;&quot;</span>&gt;<span class="p">&amp;</span><span class="c">#97;&amp;#115;&amp;#x68;&amp;#105;&amp;#115;&amp;#x68;&amp;#49;&amp;#48;&amp;#57;&amp;#57;&amp;#64;&amp;#x67;&amp;#109;&amp;#x61;&amp;#105;&amp;#108;&amp;#x2e;&amp;#99;&amp;#x6f;&amp;#x6d;&lt;/a&gt;</span>
+</span><span class='line'>    <span class="nb">exit </span>1
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="o">}</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;for resource in <span class="nv">$res</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c"># To get the current state of the resources.</span>
+</span><span class='line'>  <span class="nv">pri_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="p">&amp;</span>ldquo<span class="p">;</span>/<span class="p">&amp;</span>rdquo<span class="p">;</span> -f <span class="m">1</span> <span class="p">|</span> egrep <span class="p">&amp;</span>ldquo<span class="p">;</span>Unknown<span class="p">|</span>Primary<span class="p">|</span>Secondary<span class="p">&amp;</span>rdquo<span class="p">;</span><span class="k">)</span>
+</span><span class='line'>  <span class="nv">sec_roles</span><span class="o">=</span><span class="k">$(</span>drbdadm role <span class="nv">$resource</span>  <span class="p">|</span> cut -d <span class="p">&amp;</span>ldquo<span class="p">;</span>/<span class="p">&amp;</span>rdquo<span class="p">;</span> -f <span class="m">2</span> <span class="p">|</span> egrep <span class="p">&amp;</span>ldquo<span class="p">;</span>Unknown<span class="p">|</span>Primary<span class="p">|</span>Secondary<span class="p">&amp;</span>rdquo<span class="p">;</span><span class="k">)</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="c"># If the node has a primary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    mount_status <span class="nv">$resource</span>
+</span><span class='line'>    services start
+</span><span class='line'>    check_ip
+</span><span class='line'>    <span class="nb">echo</span> <span class="p">&amp;</span>ldquo<span class="p">;</span>This is primary node <span class="k">for</span> <span class="nv">$resource</span> resource on &lt;code&gt;hostname&lt;/code&gt;<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span><span class='line'>    <span class="k">fi</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="c"># If the node has a secondary resources</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Secondary <span class="o">]</span> <span class="o">||</span> <span class="o">[</span> <span class="nv">$pri_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    ping -c2 <span class="nv">$ip</span> &gt; /dev/null <span class="p">&amp;</span>amp<span class="p">;&amp;</span>amp<span class="p">;</span> mountpoint -q /<span class="nv">$resource</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span>
+</span><span class='line'>    <span class="k">then</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Primary <span class="o">]</span>
+</span><span class='line'>      <span class="k">then</span>
+</span><span class='line'>        <span class="nb">echo</span> <span class="p">&amp;</span>ldquo<span class="p">;</span><span class="nv">$resource</span> is available on Primary, This is a secondary node.<span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span><span class='line'>      <span class="k">fi</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;  <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Unknown <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    drbd_failover <span class="nv">$resource</span>
+</span><span class='line'>    mount_status <span class="nv">$resource</span>
+</span><span class='line'>    services start
+</span><span class='line'>    check_ip
+</span><span class='line'>    logger <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span>
+</span><span class='line'>    <span class="nb">echo</span> <span class="s2">&quot;Successfully moved drbd resources $resource and started nfs and samba on `hostname`&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD Successful Failover&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$sec_roles</span> <span class="o">=</span> Secondary <span class="o">]</span>
+</span><span class='line'>  <span class="k">then</span>
+</span><span class='line'>    <span class="nb">echo</span> -e <span class="s2">&quot;Split brain detected, Please fix manually\n\nAll these command need to be ran\n# drbdadm secondary &amp;lt;resource&amp;gt;\n# drbdadm connect --discard-my-data &amp;lt;resource&amp;gt;\n\nOn the other node (the split brain survivor), if its connection state is also StandAlone\n# drbdadm connect &amp;lt;resource&amp;gt;\n\nHere is drbd doc link http://www.drbd.org/users-guide/s-resolve-split-brain.html&quot;</span> <span class="p">|</span> mail -s <span class="s2">&quot;DRBD SplitBrain Detected&quot;</span>  ashish1099@gmail.com
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  services stop
+</span><span class='line'>  logger <span class="s2">&quot;This is seconday node of $resource. So nothing to be done on this server, because Primary is Active at this moment&quot;</span>
+</span><span class='line'><span class="k">fi</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="k">fi</span>
+</span><span class='line'><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby subcene.com Subtitle Downloader]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader/"/>
+    <updated>2014-10-15T09:14:28+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/10/15/ruby-subcene-dot-com-subtitle-downloader</id>
+    <content type="html"><![CDATA[<p>I have written a ruby script in which it will download the subtitle as you need. To demonstrate more in this, I would like to share  why I did this. Because I was tried of going onto subscene.com
+and searching for a movie and then download the subtitle and then unzip it. which was very painful for me.</p>
+
+<p>This let me write a small ruby wrapper to do all this thing automatically. This basically takes 4 arguments, like <code>--movie_name</code> <code>--year</code> <code>--resolution</code> and if you want any specific ripper subtitle then you can pass <code>--author</code>.
+Just copy this script under <code>$PATH</code> and run <code>subscene</code> like this</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;subscene&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Missing options: movie_name, year, resolution
+</span><span class='line'>&lt;strong&gt;&lt;em&gt; Subcene subtitle downloader &lt;/em&gt;&lt;/strong&gt;
+</span><span class='line'>Usage : subscene -m deliver-us-from-evil -y <span class="m">2014</span> -r 720
+</span><span class='line'>    -m, <span class="p">&amp;</span>ndash<span class="p">;</span>movie_name                 Name of the Movie
+</span><span class='line'>    -y, <span class="p">&amp;</span>ndash<span class="p">;</span>year                       Year of the Movie
+</span><span class='line'>    -r, <span class="p">&amp;</span>ndash<span class="p">;</span>resolution                 Resolution of the Movie
+</span><span class='line'>    -a, <span class="p">&amp;</span>ndash<span class="p">;</span>author                     Author/Ripper of the Movie
+</span><span class='line'>    -h, <span class="p">&amp;</span>ndash<span class="p">;</span><span class="nb">help                       </span>Display this screen&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>This show that it is looking for some arguments, so we will pass it then. As an example, I&rsquo;m taking this movie <code>22 Jump Street</code></p>
+
+<p><strong>NOTE</strong> :
+Movie name should be in this format <code>"22-jump-street"</code> <code>"gotham-first-season"</code> <code>"lost-sixth-season"</code> or <code>"deliver-us-from-evil"</code></p>
+
+<p><figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;subscene -m 22-jump-street -y <span class="m">2014</span> -r <span class="m">720</span> -a YIFY<span class="sb">`</span>&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Successfully saved 22.Jump.Street.2014.720p.BluRay.x264-SPARKS.srt at /home/Movies/
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p><figure class='code'><figcaption><span>subscene </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;!/us</span><span class="n">r</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">ruby</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Ashish Jaiswal&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Date</span> <span class="mi">12</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">2014</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;require &amp;lsquo;nokogiri&amp;rsquo;</span>
+</span><span class='line'><span class="sr">require &amp;lsquo;open-uri&amp;rsquo;</span>
+</span><span class='line'><span class="sr">require &amp;lsquo;zip&amp;rsquo;</span>
+</span><span class='line'><span class="sr">require &amp;lsquo;optparse&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">red</span><span class="p">;</span>            <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;\</span><span class="mo">033</span><span class="o">[</span><span class="mi">31</span><span class="n">m</span><span class="c1">#{self}\033[0m&amp;rdquo; end</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">green</span><span class="p">;</span>          <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;\</span><span class="mo">033</span><span class="o">[</span><span class="mi">32</span><span class="n">m</span><span class="c1">#{self}\033[0m&amp;rdquo; end</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">brown</span><span class="p">;</span>          <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;\</span><span class="mo">033</span><span class="o">[</span><span class="mi">33</span><span class="n">m</span><span class="c1">#{self}\033[0m&amp;rdquo; end</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;options = {}&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">optparse</span> <span class="o">=</span> <span class="no">OptionParser</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">opts</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">opts</span><span class="o">.</span><span class="n">banner</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;&lt;</span><span class="n">em</span><span class="o">&gt;</span> <span class="no">Subcene</span> <span class="n">subtitle</span> <span class="n">downloader</span> <span class="o">&lt;</span><span class="sr">/em&gt;&lt;/s</span><span class="n">trong</span><span class="o">&gt;</span><span class="p">\</span><span class="n">nUsage</span> <span class="p">:</span> <span class="n">subscene</span> <span class="o">-</span><span class="n">m</span> <span class="n">deliver</span><span class="o">-</span><span class="n">us</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">evil</span> <span class="o">-</span><span class="n">y</span> <span class="mi">2014</span> <span class="o">-</span><span class="n">r</span> <span class="mi">720</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">.</span><span class="n">green</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;opts.on(&quot;-m&quot;, &quot;--movie_name movie_name&quot;, &quot;Name of the Movie&quot;.brown) do |movie|</span>
+</span><span class='line'><span class="sr">options[:movie_name] =  movie</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">opts.on(&quot;-y&quot;, &quot;--year year&quot;, &quot;Year of the Movie&quot;.brown) do |year|</span>
+</span><span class='line'><span class="sr">options[:year] = year</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">opts.on(&quot;-r&quot;, &quot;--resolution res&quot;, OptionParser::DecimalInteger, &quot;Resolution of the Movie&quot;.brown) do |res|</span>
+</span><span class='line'><span class="sr">options[:resolution] = res</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">opts.on(&quot;-a&quot;, &quot;--author author&quot;, &quot;Author/</span><span class="no">Ripper</span> <span class="n">of</span> <span class="n">the</span> <span class="no">Movie</span><span class="s2">&quot;.brown) do |author|</span>
+</span><span class='line'><span class="s2">options[:author] = author</span>
+</span><span class='line'><span class="s2">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2"># This displays the help screen, all programs are assumed to have this option.</span>
+</span><span class='line'><span class="s2">opts.on( &#39;-h&#39;, &#39;--help&#39;, &#39;Display this screen&#39;.brown ) do</span>
+</span><span class='line'><span class="s2">puts opts</span>
+</span><span class='line'><span class="s2">exit</span>
+</span><span class='line'><span class="s2">end</span>
+</span><span class='line'><span class="s2">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;end&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;begin</span>
+</span><span class='line'><span class="s2">    optparse.parse!</span>
+</span><span class='line'><span class="s2">    mandatory = [:movie_name, :year, :resolution]</span>
+</span><span class='line'><span class="s2">    missing = mandatory.select { | param | options[param].nil? }</span>
+</span><span class='line'><span class="s2">    if not missing.empty?  &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">    puts &amp;ldquo;Missing options: </span><span class="si">#{</span><span class="n">missing</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="si">}</span><span class="s2">&amp;rdquo;.red &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">    puts optparse                                 &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">    exit                                          &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">    end</span>
+</span><span class='line'><span class="s2">rescue OptionParser::ParseError, OptionParser::MissingArgument</span>
+</span><span class='line'><span class="s2">    puts &amp;ldquo;Error: </span><span class="si">#{</span><span class="vg">$!</span><span class="si">}</span><span class="s2">&amp;rdquo;</span>
+</span><span class='line'><span class="s2">    exit</span>
+</span><span class='line'><span class="s2">end&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;To open the link and parse&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;subscene_page = Nokogiri::HTML(open(&amp;ldquo;&lt;a href=&quot;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//su</span><span class="n">bscene</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">subtitles</span><span class="o">/</span><span class="c1">#&quot;&gt;http://subscene.com/subtitles/#&lt;/a&gt;{options[:movie_name]}/english&amp;rdquo;))&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">To</span> <span class="n">get</span> <span class="n">the</span> <span class="n">first</span> <span class="no">Movie</span> <span class="no">Name</span> <span class="n">with</span> <span class="no">Ripper</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;subscene_name = subscene_page.css(&amp;lsquo;div.content.clearfix table tbody tr td.a1 a span&amp;rsquo;).map { | p | p.text.gsub(&amp;lsquo;English&amp;rsquo;, &amp;ldquo;&amp;rdquo;).strip }.grep(/</span><span class="c1">#{options[:year]}.#{options[:resolution]}p.BluRay.x264-#{options[:author]}/).first&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Hash</span> <span class="nb">method</span> <span class="n">used</span> <span class="n">to</span> <span class="n">bind</span> <span class="nb">name</span> <span class="ow">and</span> <span class="n">url</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;a = Hash[subscene_page.search(&amp;lsquo;div.content.clearfix table tbody tr td.a1 a&amp;rsquo;).map { | i | [i.text.gsub(&amp;lsquo;English&amp;rsquo;, &amp;ldquo;&amp;rdquo;).strip, i[&amp;lsquo;href&amp;rsquo;]] }]&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Getting</span> <span class="n">the</span> <span class="n">actual</span> <span class="n">link</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;subtitle_link = &amp;ldquo;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">subscene</span><span class="o">.</span><span class="n">com</span><span class="c1">#&quot;&gt;http://subscene.com#&lt;/a&gt;{a.values_at(&amp;rdquo;#{subscene_name}&amp;ldquo;)}&amp;rdquo;.gsub(/[[]\&amp;ldquo;]/, &amp;rdquo;&amp;ldquo;)&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Parsing</span> <span class="n">the</span> <span class="n">actual</span> <span class="n">link</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;download_page = Nokogiri::HTML(open(&amp;ldquo;</span><span class="si">#{</span><span class="n">subtitle_link</span><span class="si">}</span><span class="sr">&amp;rdquo;))&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Getting</span> <span class="n">the</span> <span class="n">download</span> <span class="n">link</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;download_link = download_page.css(&amp;lsquo;div.download a&amp;rsquo;)[0][&amp;lsquo;href&amp;rsquo;]&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Saving</span> <span class="n">the</span> <span class="n">file</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;open(&amp;ldquo;</span><span class="si">#{</span><span class="n">subscene_name</span><span class="si">}</span><span class="sr">.zip&amp;rdquo;, &amp;lsquo;wb&amp;rsquo;) do |file|</span>
+</span><span class='line'><span class="sr">    file &amp;lt;&amp;lt; open(&amp;ldquo;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">subscene</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="c1">#&quot;&gt;http://subscene.com/#&lt;/a&gt;{download_link}&amp;rdquo;).read</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Unzipping it&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">unzip_file</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+</span><span class='line'><span class="no">Zip</span><span class="o">::</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">zip_file</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">zip_file</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">f_path</span><span class="o">=</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">FileUtils</span><span class="o">.</span><span class="n">mkdir_p</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">f_path</span><span class="p">))</span>
+</span><span class='line'>    <span class="n">zip_file</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f_path</span><span class="p">)</span> <span class="k">unless</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">f_path</span><span class="p">)</span>
+</span><span class='line'>    <span class="vg">$zipname</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Remove the stall zip file after unzipping&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="nf">remove_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Actual Movie to grep and copy file&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">movie_path</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{options[:movie_name]}&amp;rdquo;.gsub(&amp;lsquo;-&amp;rsquo;, &amp;ldquo; &amp;rdquo;)&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Get</span> <span class="n">the</span> <span class="n">movie</span> <span class="n">path</span> <span class="k">in</span> <span class="sr">/home/</span><span class="no">Movies</span> <span class="n">directory</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;a = Dir.entries(&amp;lsquo;/</span><span class="n">home</span><span class="o">/</span><span class="no">Movies</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span><span class="o">|</span><span class="n">entry</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">directory?</span> <span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="no">Movies</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span><span class="n">entry</span><span class="p">)</span> <span class="ow">and</span> <span class="o">!</span><span class="p">(</span><span class="n">entry</span> <span class="o">==&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">.</span><span class="n">&amp;rsquo</span><span class="p">;</span> <span class="o">||</span> <span class="n">entry</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">.</span><span class="n">.</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;)</span> <span class="p">}</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/</span><span class="si">#{</span><span class="n">movie_path</span><span class="si">}</span><span class="sr">/i</span><span class="p">)</span>
+</span><span class='line'><span class="nb">p</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="no">Movies</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">joinner</span> <span class="o">=</span> <span class="o">[</span> <span class="nb">p</span><span class="p">,</span> <span class="n">a</span><span class="o">].</span><span class="n">join</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Calling the defination&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">unzip_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{subscene_name}.zip&amp;rdquo;, joinner)</span>
+</span><span class='line'><span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Successfully</span> <span class="n">saved</span> <span class="c1">#{$zipname} at #{joinner}&amp;rdquo;</span>
+</span><span class='line'><span class="n">remove_file</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="c1">#{subscene_name}.zip&amp;rdquo;)</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Song Downloader]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader/"/>
+    <updated>2014-06-28T03:29:23+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/28/ruby-song-downloader</id>
+    <content type="html"><![CDATA[<p>Since I&rsquo;m working on puppet DSL language from past year, so always wanted to take on <code>ruby</code>. Finally got the chances to do some task.
+I have had lost many of my songs library. So wanted to keep track of everything and needed to start from scratch. As I love Hindi/Bollywood
+songs, the only site comes to my mind is <code>songspk.name</code> and I had some trouble accessing it, due to Indian goverment blocking or either my ISP.</p>
+
+<p>To get out of this, I found a site <code>allmp3song.com</code>, which is truly simple and fast. The only problem was, I can&rsquo;t download the whole movie songs at a time.</p>
+
+<!-- more -->
+
+
+<p> You have to click on each songs and download it manually, which was very frustating. So thought of writing a script. I wrote one in bash which was quite simple by using <code>wget</code>. Then I took this as a self owned task in.</p>
+
+<p>Below is the script, which I wrote, please let me know if any improvement can be done. So far its working like charm..</p>
+
+<p><figure class='code'><figcaption><span>mp3song.rb </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;!/us</span><span class="n">r</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">ruby</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Date : 18/</span><span class="mo">04</span><span class="o">/</span><span class="mi">2014</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;Author : Ashish Jaiswal&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Email</span> <span class="no">ID</span> <span class="p">:</span> <span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#108;&amp;#x74;&amp;#111;&amp;#x3a;&amp;#x61;&amp;#115;&amp;#104;&amp;#105;&amp;#x73;&amp;#104;&amp;#x31;&amp;#x30;&amp;#x39;&amp;#x39;&amp;#x40;&amp;#x67;&amp;#x6d;&amp;#x61;&amp;#x69;&amp;#108;&amp;#x2e;&amp;#x63;&amp;#111;&amp;#109;&quot;</span><span class="o">&gt;&amp;</span><span class="c1">#97;&amp;#x73;&amp;#x68;&amp;#x69;&amp;#115;&amp;#x68;&amp;#x31;&amp;#48;&amp;#57;&amp;#x39;&amp;#x40;&amp;#x67;&amp;#109;&amp;#97;&amp;#x69;&amp;#x6c;&amp;#46;&amp;#x63;&amp;#111;&amp;#x6d;&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Purpose</span> <span class="p">:</span> <span class="no">Learning</span> <span class="n">some</span> <span class="n">ruby</span> <span class="n">basics</span><span class="o">.</span><span class="n">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;require &amp;lsquo;nokogiri&amp;rsquo;</span>
+</span><span class='line'><span class="sr">require &amp;lsquo;open-uri&amp;rsquo;</span>
+</span><span class='line'><span class="sr">require &amp;lsquo;net/</span><span class="n">http</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;filelist_id = ARGV[0]&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span> <span class="no">Sorry</span><span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span><span class="o">.</span><span class="n">.</span> <span class="no">Please</span> <span class="n">read</span> <span class="n">this</span> <span class="n">carefully</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;Please put album code. To find album code, go to any browser and search for required album.</span>
+</span><span class='line'><span class="sr">Example :</span>
+</span><span class='line'><span class="sr">    &lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">allmp3song</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">filelist</span><span class="o">/</span><span class="mi">3330</span><span class="o">/</span><span class="n">arijit_singh_</span><span class="o">-</span><span class="n">_mtv_unplugged_season_3_</span><span class="o">%</span><span class="mi">282013</span><span class="o">%</span><span class="mi">29</span><span class="o">/</span><span class="n">new2old</span><span class="o">/</span><span class="mi">1</span><span class="s2">&quot;&gt;http://allmp3song.com/filelist/3330/arijit_singh_-_mtv_unplugged_season_3_%282013%29/new2old/1&lt;/a&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;So the album code is 3330&quot;</span>
+</span><span class='line'><span class="nb">exit</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;def fetch(uri_str, songs_name, song_name, limit = 10)</span>
+</span><span class='line'><span class="sr">    # You should choose a better exception.</span>
+</span><span class='line'><span class="sr">    raise ArgumentError, &amp;lsquo;too many HTTP redirects&amp;rsquo; if limit == 0&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>    <span class="n">encoded_url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">uri_str</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">encoded_url</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">req</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;User-Agent&#39;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="s2">&quot;Ruby/</span><span class="si">#{</span><span class="no">RUBY_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> <span class="p">})</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">port</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">http</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="n">response</span>
+</span><span class='line'>    <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPSuccess</span> <span class="k">then</span>
+</span><span class='line'>        <span class="n">response</span>
+</span><span class='line'>    <span class="k">when</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTPRedirection</span> <span class="k">then</span>
+</span><span class='line'>        <span class="n">location</span> <span class="o">=</span> <span class="n">response</span><span class="o">[</span><span class="s1">&#39;location&#39;</span><span class="o">]</span>
+</span><span class='line'>        <span class="nb">puts</span> <span class="s2">&quot;Started downloading ====&amp;gt; ===&amp;gt; ==&amp;gt; </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>        <span class="k">begin</span>
+</span><span class='line'>            <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">songs_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">saved_file</span> <span class="o">|</span>
+</span><span class='line'>                            <span class="nb">open</span><span class="p">((</span><span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">URI</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span> <span class="n">read_file</span> <span class="o">|</span>
+</span><span class='line'>                                <span class="n">saved_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">read_file</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
+</span><span class='line'>                                      <span class="k">end</span> <span class="c1"># End of read_file</span>
+</span><span class='line'>                            <span class="k">end</span> <span class="c1"># End of saved_file</span>
+</span><span class='line'>            <span class="nb">puts</span> <span class="s2">&quot;Saved as </span><span class="si">#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>            <span class="nb">puts</span> <span class="s2">&quot;==============================================================================================================&quot;</span>
+</span><span class='line'>        <span class="k">rescue</span> <span class="no">OpenURI</span><span class="o">::</span><span class="no">HTTPError</span>
+</span><span class='line'>            <span class="nb">puts</span> <span class="s2">&quot;Song is not present on the server.. Sorry :)</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>        <span class="n">response</span><span class="o">.</span><span class="n">value</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;BASE_MP3SONGS_URL = &amp;ldquo;&lt;a href=&quot;http:/</span><span class="o">/</span><span class="n">allmp3song</span><span class="o">.</span><span class="n">com</span><span class="s2">&quot;&gt;http://allmp3song.com&lt;/a&gt;&amp;rdquo;</span>
+</span><span class='line'><span class="s2">FILELIST_URL = &amp;ldquo;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/1&amp;rdquo;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Calling NOKOGIRI to parse HTML&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;songs_list = Nokogiri::HTML(open(FILELIST_URL))&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Get the album name&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;album_name = songs_list.css(&amp;lsquo;div#mainDiv h2&amp;rsquo;).text.strip.gsub(/</span><span class="se">\s</span><span class="s2">: Mp3 Songs/, &amp;ldquo;&amp;rdquo;)</span>
+</span><span class='line'><span class="s2">album_path = &amp;ldquo;/home/songs/</span><span class="si">#{</span><span class="n">album_name</span><span class="si">}</span><span class="s2">/&amp;rdquo;</span>
+</span><span class='line'><span class="s2">Dir.mkdir(album_path) unless File.exists?(album_path)&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Get the list of page of particular albums.&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;pagination = songs_list.css(&amp;lsquo;div.pgn&amp;rsquo;).text.strip.gsub(/\D/, &amp;ldquo;&amp;rdquo;).slice!(1).to_i&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Run a loop to get the songs_id and based on id get the songs_name&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Example &lt;a href=&quot;</span><span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="n">allmp3song</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">files</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="nb">id</span><span class="o">/</span><span class="mi">24398</span><span class="s2">&quot;&gt;http://allmp3song.com/files/download/id/24398&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;(0..10).each do | i |</span>
+</span><span class='line'><span class="s2">    begin &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">        song_id = songs_list.css(&amp;ldquo;a.fileName&amp;rdquo;)[i][&amp;ldquo;href&amp;rdquo;].match(/\d{3,}/)</span>
+</span><span class='line'><span class="s2">        between_url = &amp;ldquo;/files/download/id/&amp;rdquo;</span>
+</span><span class='line'><span class="s2">        url_download = [ BASE_MP3SONGS_URL, between_url, song_id ].join</span>
+</span><span class='line'><span class="s2">        song_name = songs_list.css(&amp;ldquo;a.fileName div &gt; text()&amp;rdquo;).text.strip.split(&amp;ldquo;| &amp;rdquo;).fetch(i).gsub(/\D$/, &amp;ldquo;&amp;rdquo;)</span>
+</span><span class='line'><span class="s2">        songs_name = &amp;ldquo;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&amp;rdquo;</span>
+</span><span class='line'><span class="s2">        print fetch(url_download, songs_name, song_name)</span>
+</span><span class='line'><span class="s2">    rescue NoMethodError</span>
+</span><span class='line'><span class="s2">    end # End of BEGIN</span>
+</span><span class='line'><span class="s2">end # End of DO&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;h1&gt;Looking for Second page.&lt;/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">&lt;p&gt;if pagination &gt; 1</span>
+</span><span class='line'><span class="s2">    FILELIST_URL02 = &amp;ldquo;</span><span class="si">#{</span><span class="no">BASE_MP3SONGS_URL</span><span class="si">}</span><span class="s2">/filelist/</span><span class="si">#{</span><span class="n">filelist_id</span><span class="si">}</span><span class="s2">/*/new2old/2&amp;rdquo;</span>
+</span><span class='line'><span class="s2">    songs_list02 = Nokogiri::HTML(open(FILELIST_URL02))</span>
+</span><span class='line'><span class="s2">(0..10).each do | i |</span>
+</span><span class='line'><span class="s2">    begin &lt;br/&gt;</span>
+</span><span class='line'><span class="s2">        song_id = songs_list02.css(&amp;ldquo;a.fileName&amp;rdquo;)[i][&amp;ldquo;href&amp;rdquo;].match(/\d{3,}/)</span>
+</span><span class='line'><span class="s2">        between_url = &amp;ldquo;/files/download/id/&amp;rdquo;</span>
+</span><span class='line'><span class="s2">        url_download = [ BASE_MP3SONGS_URL, between_url, song_id ].join</span>
+</span><span class='line'><span class="s2">        song_name = songs_list02.css(&amp;ldquo;a.fileName div &gt; text()&amp;rdquo;).text.strip.split(&amp;ldquo;| &amp;rdquo;).fetch(i).gsub(/\D$/, &amp;ldquo;&amp;rdquo;)</span>
+</span><span class='line'><span class="s2">        songs_name = &amp;ldquo;</span><span class="si">#{</span><span class="n">album_path</span><span class="si">}#{</span><span class="n">song_name</span><span class="si">}</span><span class="s2">&amp;rdquo;</span>
+</span><span class='line'><span class="s2">        print fetch(url_download, songs_name, song_name)</span>
+</span><span class='line'><span class="s2">    rescue NoMethodError</span>
+</span><span class='line'><span class="s2">        end # End of BEGIN</span>
+</span><span class='line'><span class="s2">    end # End of DO</span>
+</span><span class='line'><span class="s2">end # End of IF</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

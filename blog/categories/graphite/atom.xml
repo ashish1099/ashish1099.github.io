@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Graphite | My Octopress Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/graphite/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T01:35:39+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Collectd DRBD Plugin]]></title>
+    <link href="http://ashish1099.github.io/blog/2014/06/27/collectd-drbd-plugin/"/>
+    <updated>2014-06-27T12:20:30+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2014/06/27/collectd-drbd-plugin</id>
+    <content type="html"><![CDATA[<p>I have ran into a scenario where my manager wanted to monitor drbd resource. So we are using graphite over here and pushing data from collectd to graphite.
+I did a quick search on <strong>google.com</strong>, but didn&rsquo;t find any collectd drbd plugin. Actually I found one which is in python, <a href="https://git.kumina.nl/packages/collectd-plugins-kumina/blob/master/drbd.py">This is the link</a></p>
+
+<p>Only problem which I remember, when I was testing this, it looks for only one resource. Since I haven&rsquo;t learned python.
+I thought of writing my own. I wrote a bash script and got the job done.</p>
+
+<!-- more -->
+
+
+<p><figure class='code'><figcaption><span>drbd.sh </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;!/bin/bash&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;Example&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;ns:0 nr:1950024 dw:1950024 dr:0 al:0 bm:143 lo:0 pe:0 ua:0 ap:0 ep:1 wo:d oos:0&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;Author: Ashish Jaiswal&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;HOSTNAME<span class="o">=</span><span class="k">$(</span>hostname<span class="k">)</span>
+</span><span class='line'><span class="nv">INTERVAL</span><span class="o">=</span>1&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;while sleep <span class="p">&amp;</span>ldquo<span class="p">;</span><span class="nv">$INTERVAL</span><span class="p">&amp;</span>rdquo<span class="p">;</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>        <span class="c"># How many resource are running out there.</span>
+</span><span class='line'>        <span class="nv">resource_count</span><span class="o">=</span><span class="k">$(</span>drbd-overview  <span class="p">|</span> wc -l<span class="k">)</span>
+</span><span class='line'>        <span class="k">for</span> i in <span class="k">$(</span>seq <span class="m">1</span> <span class="nv">$resource_count</span><span class="k">)</span>
+</span><span class='line'>        <span class="k">do</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;            <span class="c"># Gives the list of the resource name</span>
+</span><span class='line'>            <span class="nv">name</span><span class="o">=</span><span class="k">$(</span>drbd-overview <span class="p">|</span> awk <span class="s2">&quot;NR==$i&quot;</span> <span class="p">|</span> awk -F <span class="s2">&quot;:&quot;</span> <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f 1<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nv">ns</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $1}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">nr</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">dw</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $3}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">dr</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $4}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">al</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $5}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">bm</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $6}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">lo</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $7}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">pe</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $8}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">ua</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $9}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">ap</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $10}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">ep</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $11}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>            <span class="nv">oss</span><span class="o">=</span><span class="k">$(</span>grep -A <span class="m">1</span> <span class="s2">&quot;$i: cs:Connected&quot;</span> /proc/drbd <span class="p">|</span> awk <span class="s1">&#39;NR==2&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $13}&#39;</span> <span class="p">|</span> cut -d <span class="s2">&quot;:&quot;</span> -f 2<span class="k">)</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/network_send interval=$INTERVAL N:$ns&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/network_receive interval=$INTERVAL N:$nr&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/disk_write interval=$INTERVAL N:$dw&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/disk_read interval=$INTERVAL N:$dr&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/activity_log interval=$INTERVAL N:$al&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/bit_map interval=$INTERVAL N:$bm&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/local_count interval=$INTERVAL N:$lo&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/pending interval=$INTERVAL N:$pe&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/unacknowledged interval=$INTERVAL N:$ua&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/application_pending interval=$INTERVAL N:$ap&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/epochs interval=$INTERVAL N:$ep&quot;</span>
+</span><span class='line'>            <span class="nb">echo</span> <span class="s2">&quot;PUTVAL $HOSTNAME/drbd-$name/out_of_sync interval=$INTERVAL N:$oss&quot;</span>
+</span><span class='line'>    <span class="k">done</span> <span class="c"># End of name</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;done <span class="c"># End of while</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Create a file under <code>/etc/collect.d/drbd</code> and enter this
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>LoadPlugin exec
+</span><span class='line'>&lt;Plugin exec>
+</span><span class='line'>Exec &ldquo;nobody&rdquo; &ldquo;/usr/lib64/collectd/python-plugins/drbd.sh&rdquo;
+</span><span class='line'>NotificationExec &ldquo;nobody&rdquo; &ldquo;/usr/lib64/collectd/python-plugins/drbd.sh&rdquo;
+</span><span class='line'>&lt;/Plugin></span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>
