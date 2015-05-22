@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Lxc | Ashish Jaiswal Blog]]></title>
+  <link href="http://ashish1099.github.io/blog/categories/lxc/atom.xml" rel="self"/>
+  <link href="http://ashish1099.github.io/"/>
+  <updated>2015-05-23T02:24:33+05:30</updated>
+  <id>http://ashish1099.github.io/</id>
+  <author>
+    <name><![CDATA[Ashish Jaiswal]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Docker Inside LXC]]></title>
+    <link href="http://ashish1099.github.io/blog/2015/05/23/docker-inside-lxc/"/>
+    <updated>2015-05-23T02:08:23+05:30</updated>
+    <id>http://ashish1099.github.io/blog/2015/05/23/docker-inside-lxc</id>
+    <content type="html"><![CDATA[<p>Install lxc
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get update &amp;&amp; apt-get install lxc</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Change lxc default.conf
+Add these line
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc.aa_profile = unconfined
+</span><span class='line'>lxc.cgroup.devices.allow = a
+</span><span class='line'>lxc.cap.drop =</span></code></pre></td></tr></table></div></figure></p>
+
+<!-- more -->
+
+
+<p>Nothing to list images, there is but in hidden way. just run <code>lxc-create -t download -n anyname</code>
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc-create -t download -n test01 &ndash; -d ubuntu -r trusty -a amd64</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Start the image
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc-start -n test01 -d</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Get status of the container
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc-ls &ndash;fancy&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;h2>NAME      STATE    IPV4        IPV6  GROUPS  AUTOSTART&lt;/h2>
+</span><span class='line'>
+</span><span class='line'>&lt;p>test01  RUNNING  10.0.3.225  -     -       NO</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Make apparamor changes [Note: This require only if you didn&rsquo;t updated the default.conf file ]
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;h1>Distribution configuration&lt;/h1>
+</span><span class='line'>
+</span><span class='line'>&lt;p>lxc.include = /usr/share/lxc/config/ubuntu.common.conf
+</span><span class='line'>lxc.arch = x86_64&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;h1>Container specific configuration&lt;/h1>
+</span><span class='line'>
+</span><span class='line'>&lt;p>lxc.aa_profile = unconfined
+</span><span class='line'>lxc.cgroup.devices.allow = a
+</span><span class='line'>lxc.cap.drop =
+</span><span class='line'>lxc.rootfs = /var/lib/lxc/test01/rootfs
+</span><span class='line'>lxc.utsname = test01&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;h1>Network configuration&lt;/h1>
+</span><span class='line'>
+</span><span class='line'>&lt;p>lxc.network.type = veth
+</span><span class='line'>lxc.network.link = lxcbr0
+</span><span class='line'>lxc.network.flags = up
+</span><span class='line'>lxc.network.hwaddr = 00:16:3e:6c:ee:91</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Install some packages inside container
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc-attach &ndash;name=test01
+</span><span class='line'>apt-get install wget apparmor => [Needed by docker, otherwise docker upstart will fail]
+</span><span class='line'>wget -qO- &lt;a href="https://get.docker.com/">https://get.docker.com/&lt;/a> | sh</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Status of docker process
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@test01:~# status docker
+</span><span class='line'>docker start/running, process 5113</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Check info
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@test01:~# docker info
+</span><span class='line'>Containers: 0
+</span><span class='line'>Images: 0
+</span><span class='line'>Storage Driver: aufs
+</span><span class='line'> Root Dir: /var/lib/docker/aufs
+</span><span class='line'>  Backing Filesystem: extfs
+</span><span class='line'>   Dirs: 0
+</span><span class='line'>    Dirperm1 Supported: false
+</span><span class='line'>    Execution Driver: native-0.2
+</span><span class='line'>    Kernel Version: 3.13.0-49-generic
+</span><span class='line'>    Operating System: Ubuntu 14.04.2 LTS (containerized)
+</span><span class='line'>    CPUs: 2
+</span><span class='line'>    Total Memory: 7.767 GiB
+</span><span class='line'>    Name: test01
+</span><span class='line'>    ID: ZVIJ:HC4N:T3AF:YFKN:JTXX:AUST:WJJG:GVZ7:YTVP:F5QZ:OYSK:HOFR
+</span><span class='line'>    WARNING: No swap limit support</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Check version
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@test01:~# docker version
+</span><span class='line'>Client version: 1.6.2
+</span><span class='line'>Client API version: 1.18
+</span><span class='line'>Go version (client): go1.4.2
+</span><span class='line'>Git commit (client): 7c8fca2
+</span><span class='line'>OS/Arch (client): linux/amd64
+</span><span class='line'>Server version: 1.6.2
+</span><span class='line'>Server API version: 1.18
+</span><span class='line'>Go version (server): go1.4.2
+</span><span class='line'>Git commit (server): 7c8fca2
+</span><span class='line'>OS/Arch (server): linux/amd64</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Run a ubuntu container
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@test01:~# docker run -t -i ubuntu /bin/bash
+</span><span class='line'>Unable to find image &lsquo;ubuntu:latest&rsquo; locally
+</span><span class='line'>latest: Pulling from ubuntu
+</span><span class='line'>e9e06b06e14c: Pull complete
+</span><span class='line'>a82efea989f9: Pull complete
+</span><span class='line'>37bea4ee0c81: Pull complete
+</span><span class='line'>07f8e8c5e660: Already exists
+</span><span class='line'>ubuntu:latest: The image you are pulling has been verified. Important: image verification is a tech preview feature and should not be relied on to provide security.
+</span><span class='line'>Digest: sha256:8126991394342c2775a9ba4a843869112da8156037451fc424454db43c25d8b0
+</span><span class='line'>Status: Downloaded newer image for ubuntu:latest
+</span><span class='line'>root@44e667fbf162:/#
+</span><span class='line'>root@44e667fbf162:/#
+</span><span class='line'>root@44e667fbf162:/#
+</span><span class='line'>root@44e667fbf162:/# exit
+</span><span class='line'>exit</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Status of newly created image and container
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>root@test01:~# docker images
+</span><span class='line'>REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+</span><span class='line'>ubuntu              latest              07f8e8c5e660        2 weeks ago         188.3 MB
+</span><span class='line'>root@test01:~# docker ps -a
+</span><span class='line'>CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+</span><span class='line'>44e667fbf162        ubuntu:latest       &ldquo;/bin/bash&rdquo;         24 seconds ago      Exited (0) 7 seconds ago                       modest_yonath</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Any problem, look here to troubleshoot
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tail -f /var/log/kern.log /var/log/syslog /var/log/dmesg /var/log/upstart/docker.log</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+  </entry>
+  
+</feed>

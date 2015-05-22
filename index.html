@@ -9,8 +9,13 @@
   <meta name="author" content="Ashish Jaiswal">
 
   
-  <meta name="description" content="I have written a script to do a failover of DRBD resources. This script will get the drbd start mount the partition,
-and start the nfsserver and &hellip;">
+  <meta name="description" content="Install lxc Terminal 1
+apt-get update && apt-get install lxc Change lxc default.conf
+Add these line Terminal 1
+2
+3
+lxc.aa_profile = unconfined
+lxc. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -100,6 +105,58 @@ and start the nfsserver and &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/23/docker-inside-lxc/">Docker Inside LXC</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-23T02:08:23+05:30'><span class='date'><span class='date-month'>May</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2015</span></span> <span class='time'>2:08 am</span></time>
+        
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Install lxc</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get update && apt-get install lxc</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Change lxc default.conf
+Add these line</p>
+
+<figure class='code'><figcaption><span>Terminal </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>lxc.aa_profile = unconfined
+</span><span class='line'>lxc.cgroup.devices.allow = a
+</span><span class='line'>lxc.cap.drop =</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/05/23/docker-inside-lxc/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -471,44 +528,6 @@ songs, the only site comes to my mind is <code>songspk.name</code> and I had som
   
     <footer>
       <a rel="full-article" href="/blog/2014/06/28/ruby-song-downloader/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet/">Managing Daemons in Heterogeneous Linux Environment From Puppet</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-06-28T00:01:13+05:30'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:01 am</span></time>
-        
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>We have a lot of box mixed with heterogeneous linux environment. So managing a daemons is a bit struggling. So worte my own manifest to over come this. I don&rsquo;t know what other options there are, But this seems to kind of work for me.
-This can be scale upto <strong>N</strong> number of linux flavours, currently I have the manifest including only <code>CentOS, OpenSuSE, Ubuntu</code>.</p>
-
-<p>Let me know if you have any trouble with it or any improvement is always welcome.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/06/28/managing-daemons-in-heterogeneous-linux-environment-from-puppet/">Read on &rarr;</a>
     </footer>
   
 
