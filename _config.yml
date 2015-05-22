@@ -3,11 +3,11 @@
 # ----------------------- #
 
 url: http://ashish1099.github.io
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+title: "Ashish Jaiswal Blog"
+subtitle: A blog dedicated to community
+author: Ashish Jaiswal
 simple_search: https://www.google.com/search
-description:
+description: "I'm an automation engineer, and a system engineer, well you know devops kinda things is my daily task."
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
@@ -16,10 +16,10 @@ description:
 date_format: "ordinal"
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
-subscribe_rss: /atom.xml
-subscribe_email:
+#subscribe_rss: /atom.xml
+#subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+#email:
 
 # ----------------------- #
 #    Jekyll & Plugins     #
@@ -64,17 +64,17 @@ default_asides: [asides/recent_posts.html, asides/github.html, asides/delicious.
 # ----------------------- #
 
 # Github repositories
-github_user:
+github_user: ashish1099 
 github_repo_count: 0
 github_show_profile_link: true
 github_skip_forks: true
 
 # Twitter
-twitter_user:
+twitter_user: ashish1099
 twitter_tweet_button: true
 
 # Google +1
-google_plus_one: false
+google_plus_one: true
 google_plus_one_size: medium
 
 # Google Plus Profile
@@ -91,7 +91,7 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name:
+disqus_short_name: ashish1099
 disqus_show_comment_count: false
 
 # Google Analytics
