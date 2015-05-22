@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Puppet | My Octopress Blog]]></title>
+  <title><![CDATA[Category: Puppet | Ashish Jaiswal Blog]]></title>
   <link href="http://ashish1099.github.io/blog/categories/puppet/atom.xml" rel="self"/>
   <link href="http://ashish1099.github.io/"/>
-  <updated>2015-05-23T01:48:46+05:30</updated>
+  <updated>2015-05-23T02:06:11+05:30</updated>
   <id>http://ashish1099.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Ashish Jaiswal]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
