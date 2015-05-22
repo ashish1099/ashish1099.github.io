@@ -1,4 +1,4 @@
 User-agent: *
-Disallow: 
+Disallow:
 
-Sitemap: http://ashish1099.github.io/sitemap.xml 
+Sitemap: http://ashish1099.github.io/sitemap.xml
